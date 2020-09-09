@@ -77,6 +77,10 @@ func (pg *PackageGenerator) genNodeJSFiles() (map[string]*bytes.Buffer, error) {
 	// Generates CustomResourceDefinition constructors. Soon this will be
 	// replaced with `kube2pulumi`
 	for _, crg := range pg.CustomResourceGenerators {
+		if !IsValidAPIVersion(crg.APIVersion) {
+			continue
+		}
+
 		definitionFileName := toLowerFirst(crg.Kind) + "Definition"
 
 		// Create the customResourceDefinition.ts class

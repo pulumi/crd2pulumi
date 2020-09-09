@@ -33,7 +33,7 @@ var anyTypeSpec = pschema.TypeSpec{
 	Ref: anyTypeRef,
 }
 var arbitraryJSONTypeSpec = pschema.TypeSpec{
-	Type:                 "object",
+	Type:                 Object,
 	AdditionalProperties: &anyTypeSpec,
 }
 
@@ -44,13 +44,22 @@ const objectMetaToken = "kubernetes:meta/v1:ObjectMeta"
 var intOrStringTypeSpec = pschema.TypeSpec{
 	OneOf: []pschema.TypeSpec{
 		pschema.TypeSpec{
-			Type: "integer",
+			Type: Integer,
 		},
 		pschema.TypeSpec{
-			Type: "string",
+			Type: String,
 		},
 	},
 }
+
+const (
+	Boolean string = "boolean"
+	Integer string = "integer"
+	Number string = "number"
+	String string = "string"
+	Array string = "array"
+	Object string = "object"
+)
 
 func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 	types := map[string]pschema.ObjectTypeSpec{}
@@ -58,23 +67,26 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 	for _, crg := range pg.CustomResourceGenerators {
 		for version, schema := range crg.Schemas {
 			resourceToken := getToken(crg.Group, version, crg.Kind)
-			AddType(schema, resourceToken, types)
-			types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
-				TypeSpec: pschema.TypeSpec{
-					Type: "string",
-				},
-				Const: crg.Group + "/" + version,
-			}
-			types[resourceToken].Properties["kind"] = pschema.PropertySpec{
-				TypeSpec: pschema.TypeSpec{
-					Type: "string",
-				},
-				Const: crg.Kind,
-			}
-			types[resourceToken].Properties["metadata"] = pschema.PropertySpec{
-				TypeSpec: pschema.TypeSpec{
-					Ref: objectMetaRef,
-				},
+			_, foundProperties, _ := unstruct.NestedMap(schema, "properties")
+			if foundProperties {
+				AddType(schema, resourceToken, types)
+				types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
+					TypeSpec: pschema.TypeSpec{
+						Type: String,
+					},
+					Const: crg.Group + "/" + version,
+				}
+				types[resourceToken].Properties["kind"] = pschema.PropertySpec{
+					TypeSpec: pschema.TypeSpec{
+						Type: String,
+					},
+					Const: crg.Kind,
+				}
+				types[resourceToken].Properties["metadata"] = pschema.PropertySpec{
+					TypeSpec: pschema.TypeSpec{
+						Ref: objectMetaRef,
+					},
+				}
 			}
 		}
 	}
@@ -130,10 +142,6 @@ func isAnyType(typeSpec pschema.TypeSpec) bool {
 // nested schemas as well.
 func AddType(schema map[string]interface{}, name string, types map[string]pschema.ObjectTypeSpec) {
 	properties, foundProperties, _ := unstruct.NestedMap(schema, "properties")
-	if !foundProperties {
-		return
-	}
-
 	description, _, _ := unstruct.NestedString(schema, "description")
 	schemaType, _, _ := unstruct.NestedString(schema, "type")
 	required, _, _ := unstruct.NestedStringSlice(schema, "required")
@@ -148,6 +156,11 @@ func AddType(schema map[string]interface{}, name string, types map[string]pschem
 			Description: propertyDescription,
 			Default:     defaultValue,
 		}
+	}
+
+	// If the type wasn't specified but we found properties, then we can infer that the type is an object
+	if foundProperties && schemaType == "" {
+		schemaType = Object
 	}
 
 	types[name] = pschema.ObjectTypeSpec{
@@ -222,21 +235,21 @@ func GetTypeSpec(schema map[string]interface{}, name string, types map[string]ps
 	}
 
 	switch schemaType {
-	case "array":
+	case Array:
 		items, _, _ := unstruct.NestedMap(schema, "items")
 		arrayTypeSpec := GetTypeSpec(items, name, types)
 		return pschema.TypeSpec{
-			Type:  "array",
+			Type:  Array,
 			Items: &arrayTypeSpec,
 		}
-	case "object":
+	case Object:
 		AddType(schema, name, types)
 		// If `additionalProperties` has a sub-schema, then we generate a type for a map from string --> sub-schema type
 		additionalProperties, foundAdditionalProperties, _ := unstruct.NestedMap(schema, "additionalProperties")
 		if foundAdditionalProperties {
 			additionalPropertiesTypeSpec := GetTypeSpec(additionalProperties, name, types)
 			return pschema.TypeSpec{
-				Type:                 "object",
+				Type:                 Object,
 				AdditionalProperties: &additionalPropertiesTypeSpec,
 			}
 		}
@@ -244,7 +257,7 @@ func GetTypeSpec(schema map[string]interface{}, name string, types map[string]ps
 		additionalPropertiesIsTrue, additionalPropertiesIsTrueFound, _ := unstruct.NestedBool(schema, "additionalProperties")
 		if additionalPropertiesIsTrueFound && additionalPropertiesIsTrue {
 			return pschema.TypeSpec{
-				Type:                 "object",
+				Type:                 Object,
 				AdditionalProperties: &anyTypeSpec,
 			}
 		}
@@ -255,16 +268,16 @@ func GetTypeSpec(schema map[string]interface{}, name string, types map[string]ps
 		}
 		// If properties are found, then we must specify those in a seperate interface
 		return pschema.TypeSpec{
-			Type: "object",
+			Type: Object,
 			Ref:  "#/types/" + name,
 		}
-	case "integer":
+	case Integer:
 		fallthrough
-	case "boolean":
+	case Boolean:
 		fallthrough
-	case "string":
+	case String:
 		fallthrough
-	case "number":
+	case Number:
 		return pschema.TypeSpec{
 			Type: schemaType,
 		}
@@ -304,7 +317,7 @@ func CombineSchemas(combineRequired bool, schemas ...map[string]interface{}) map
 	}
 
 	combinedSchema := map[string]interface{}{
-		"type":       "object",
+		"type":       Object,
 		"properties": combinedProperties,
 	}
 	if combineRequired {

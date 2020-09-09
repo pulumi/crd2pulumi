@@ -261,10 +261,6 @@ type CustomResourceGenerator struct {
 
 func NewCustomResourceGenerator(crd unstruct.Unstructured) (CustomResourceGenerator, error) {
 	apiVersion := crd.GetAPIVersion()
-	if !IsValidAPIVersion(apiVersion) {
-		return CustomResourceGenerator{},
-			errors.Errorf("invalid apiVersion %s; only v1 and v1beta1 are supported", apiVersion)
-	}
 
 	schemas := map[string]map[string]interface{}{}
 	validation, foundValidation, _ := unstruct.NestedMap(crd.Object, "spec", "validation", "openAPIV3Schema")
