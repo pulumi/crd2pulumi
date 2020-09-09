@@ -6,7 +6,7 @@ Generate typed CustomResources based on Kubernetes CustomResourceDefinitions.
 `crd2pulumi` is a CLI tool that generates typed CustomResources based on Kubernetes CustomResourceDefinition (CRDs). CRDs allow you to extend the Kubernetes API by defining your own schemas for custom objects. While Pulumi lets you create [CustomResources](https://www.pulumi.com/docs/reference/pkg/kubernetes/apiextensions/customresource/), there was previously no strong-typing for these objects since every schema was, well, custom. This can be a massive headache for popular CRDs such as [cert-manager](https://github.com/jetstack/cert-manager/tree/master/deploy/crds) or [istio](https://github.com/istio/istio/tree/0321da58ca86fc786fb03a68afd29d082477e4f2/manifests/charts/base/crds), which contain thousands of lines of complex YAML schemas. By generating typed versions of CustomResources, `crd2pulumi` makes filling out their arguments more convenient by allowing you to leverage existing IDE type checking and autocomplete features.
 
 ## Building and Installation
-If you wish to use `crd2pulumi` without developing the tool itself, you can use one of the [binary releases](https://github.com/pulumi/pulumi-kubernetes/releases/tag/crd2pulumi/v1.0.0) hosted on GitHub.
+If you wish to use `crd2pulumi` without developing the tool itself, you can use one of the [binary releases](https://github.com/pulumi/crd2pulumi/releases) hosted on this repository. 
 
 `crd2pulumi` uses Go modules to manage dependencies. If you want to develop `crd2pulumi` itself, you'll need to have Go installed in order to build. Once you install this prerequisite, run the following to build the `crd2pulumi` binary and install it into `$GOPATH/bin`:
 
