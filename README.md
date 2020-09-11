@@ -81,8 +81,6 @@ $ crd2pulumi --pythonPath ./crontabs resourcedefinition.yaml
 ```
 ```python
 import pulumi_kubernetes as k8s
-import pulumi_kubernetes.apiextensions.v1 as v1
-
 import crontabs.pulumi_crds as crontabs
 
 

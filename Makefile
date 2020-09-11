@@ -1,5 +1,5 @@
 PROJECT          := github.com/pulumi/crd2pulumi
-VERSION := 1.0.3
+VERSION := 1.0.4
 LDFLAGS := "-X 'github.com/pulumi/crd2pulumi/gen.Version=$(VERSION)'"
 
 GO              ?= go
