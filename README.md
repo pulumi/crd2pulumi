@@ -3,48 +3,75 @@ Generate typed CustomResources based on Kubernetes CustomResourceDefinitions.
 
 ## Goals
 
-`crd2pulumi` is a CLI tool that generates typed CustomResources based on Kubernetes CustomResourceDefinition (CRDs). CRDs allow you to extend the Kubernetes API by defining your own schemas for custom objects. While Pulumi lets you create [CustomResources](https://www.pulumi.com/docs/reference/pkg/kubernetes/apiextensions/customresource/), there was previously no strong-typing for these objects since every schema was, well, custom. This can be a massive headache for popular CRDs such as [cert-manager](https://github.com/jetstack/cert-manager/tree/master/deploy/crds) or [istio](https://github.com/istio/istio/tree/0321da58ca86fc786fb03a68afd29d082477e4f2/manifests/charts/base/crds), which contain thousands of lines of complex YAML schemas. By generating typed versions of CustomResources, `crd2pulumi` makes filling out their arguments more convenient by allowing you to leverage existing IDE type checking and autocomplete features.
+`crd2pulumi` is a CLI tool that generates typed CustomResources based on Kubernetes CustomResourceDefinition (CRDs). 
+CRDs allow you to extend the Kubernetes API by defining your own schemas for custom objects. While Pulumi lets you create
+ [CustomResources](https://www.pulumi.com/docs/reference/pkg/kubernetes/apiextensions/customresource/), there was previously 
+ no strong-typing for these objects since every schema was, well, custom. This can be a massive headache for popular CRDs 
+ such as [cert-manager](https://github.com/jetstack/cert-manager/tree/master/deploy/crds) or 
+ [istio](https://github.com/istio/istio/tree/0321da58ca86fc786fb03a68afd29d082477e4f2/manifests/charts/base/crds), which 
+ contain thousands of lines of complex YAML schemas. By generating typed versions of CustomResources, `crd2pulumi` makes 
+ filling out their arguments more convenient by allowing you to leverage existing IDE type checking and autocomplete features.
 
 ## Building and Installation
 If you wish to use `crd2pulumi` without developing the tool itself, you can use one of the [binary releases](https://github.com/pulumi/crd2pulumi/releases) hosted on this repository. 
 
-`crd2pulumi` uses Go modules to manage dependencies. If you want to develop `crd2pulumi` itself, you'll need to have Go installed in order to build. Once you install this prerequisite, run the following to build the `crd2pulumi` binary and install it into `$GOPATH/bin`:
+### Homebrew
+`crd2pulumi` can be installed on Mac from the Pulumi Homebrew tap.
+```console
+brew install pulumi/tap/crd2pulumi
+```
+
+`crd2pulumi` uses Go modules to manage dependencies. If you want to develop `crd2pulumi` itself, you'll need to have 
+Go installed in order to build. Once you install this prerequisite, run the following to build the `crd2pulumi` binary 
+and install it into `$GOPATH/bin`:
 
 ```bash
-$ go build -ldflags="-X 'github.com/pulumi/crd2pulumi/gen.Version=1.0.0'" -o $GOPATH/bin/crd2pulumi main.go
+$ go build -ldflags="-X github.com/pulumi/crd2pulumi/gen.Version=dev" -o $GOPATH/bin/crd2pulumi main.go
 ```
-The `ldflags` argument is necessary to dynamically set the `crd2pulumi` version at build time. However, the version
-itself can be anything, so you don't have to set it to `1.0.0`.
+The `ldflags` argument is necessary to dynamically set the `crd2pulumi` version at build time. However, the version 
+itself can be anything, so you don't have to set it to `dev`.
 
-Go should then automatically handle pulling the dependencies for you. If `$GOPATH/bin` is not on your path, you may want to move the `crd2pulumi` binary from `$GOPATH/bin` into a directory that is on your path.
+Go should then automatically handle pulling the dependencies for you. If `$GOPATH/bin` is not on your path, you may 
+want to move the `crd2pulumi` binary from `$GOPATH/bin` into a directory that is on your path.
 
 ## Usage
 ```bash
-crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...] [--force]
+crd2pulumi is a CLI tool that generates typed Kubernetes
+CustomResources to use in Pulumi programs, based on a
+CustomResourceDefinition YAML schema.
 
-Example usage:
-$ crd2pulumi --nodejs crontabs.yaml
-$ crd2pulumi -dgnp crd-certificates.yaml crd-issuers.yaml crd-challenges.yaml
-$ crd2pulumi --pythonPath=crds/python/istio --nodejsPath=crds/nodejs/istio crd-all.gen.yaml crd-mixer.yaml crd-operator.yaml
+Usage:
+  crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...] [flags]
+
+Examples:
+crd2pulumi --nodejs crontabs.yaml
+crd2pulumi -dgnp crd-certificates.yaml crd-issuers.yaml crd-challenges.yaml
+crd2pulumi --pythonPath=crds/python/istio --nodejsPath=crds/nodejs/istio crd-all.gen.yaml crd-mixer.yaml crd-operator.yaml
+
+Notice that by just setting a language-specific output path (--pythonPath, --nodejsPath, etc) the code will
+still get generated, so setting -p, -n, etc becomes unnecessary.
+
 
 Flags:
   -d, --dotnet              generate .NET
       --dotnetPath string   optional .NET output dir
+  -f, --force               overwrite existing files
   -g, --go                  generate Go
       --goPath string       optional Go output dir
+  -h, --help                help for crd2pulumi
   -n, --nodejs              generate NodeJS
       --nodejsPath string   optional NodeJS output dir
   -p, --python              generate Python
       --pythonPath string   optional Python output dir
-
-  -f, --force               overwrite existing files
-  -v, --version             version for crd2pulumi
-  -h, --help                help for crd2pulumi
 ```
-Setting only a language-specific flag will output the generated code in the default directory; so `-d` will output to `crds/dotnet`, `-g` will output to `crds/go`, `-n` will output to `crds/nodejs`, and `-p` will output to `crds/python`. You can also specify a language-specific path (`--pythonPath`, `--nodejsPath`, etc) to control where the code will be outputted, in which case setting `-p`, `-n`, etc becomes unnecessary.
+Setting only a language-specific flag will output the generated code in the default directory; so `-d` will output to 
+`crds/dotnet`, `-g` will output to `crds/go`, `-n` will output to `crds/nodejs`, and `-p` will output to `crds/python`. 
+You can also specify a language-specific path (`--pythonPath`, `--nodejsPath`, etc) to control where the code will be 
+outputted, in which case setting `-p`, `-n`, etc becomes unnecessary.
 
 ## Examples
-Let's use the example CronTab CRD specified in `resourcedefinition.yaml` from the [Kubernetes Documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). 
+Let's use the example CronTab CRD specified in `resourcedefinition.yaml` from the 
+[Kubernetes Documentation](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/). 
 
 ### TypeScript
 To generate a strongly-typed CronTab CustomResource in TypeScript, we can run this command:
@@ -105,7 +132,9 @@ crontab_instance = crontabs.stable.v1.CronTab(
 ```bash
 $ crd2pulumi --goPath ./crontabs resourcedefinition.yaml
 ```
-Now we can access the `NewCronTab()` constructor. Create a `main.go` file with the following code. In this example, the Pulumi project's module is named `crds-go-final`, so the import path is `crds-go-final/crontabs/stable/v1`. Make sure to swap this out with your own module's name.
+Now we can access the `NewCronTab()` constructor. Create a `main.go` file with the following code. In this example, 
+the Pulumi project's module is named `crds-go-final`, so the import path is `crds-go-final/crontabs/stable/v1`. Make 
+sure to swap this out with your own module's name.
 ```go
 package main
 

@@ -1,0 +1,35 @@
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    ldflags:
+      - -X github.com/pulumi/crd2pulumi/gen.Version={{.Tag}}
+    goarch:
+      - amd64
+    binary: crd2pulumi
+    main: ./main.go
+archives:
+  - name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  skip: true
+brews:
+  -
+    name: crd2pulumi
+    github:
+      owner: pulumi
+      name: homebrew-tap
+    commit_author:
+      name: pulumi-bot
+      email: bot@pulumi.com
+    homepage: "https://pulumi.com"
+    description: "Generate typed CustomResources in Pulumi from Kubernetes CRDs"
