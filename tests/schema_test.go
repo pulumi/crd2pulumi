@@ -25,7 +25,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const TestUnderscoreFieldsYAML = "test-underscorefields.yaml"
 const TestCombineSchemasYAML = "test-combineschemas.yaml"
 const TestGetTypeSpecYAML = "test-gettypespec.yaml"
 const TestGetTypeSpecJSON = "test-gettypespec.json"
@@ -53,21 +52,6 @@ func UnmarshalTypeSpecJSON(jsonPath string) (map[string]pschema.TypeSpec, error)
 		return nil, errors.Wrapf(err, "could not unmarshal %s", jsonPath)
 	}
 	return v, nil
-}
-
-func TestUnderscoreFields(t *testing.T) {
-	schemas, err := UnmarshalSchemas(TestUnderscoreFieldsYAML)
-	assert.NoError(t, err)
-
-	// Test that calling underscoreFields() on each initial schema changes it
-	// to become the same as the expected schema
-	for name := range schemas {
-		schema := schemas[name].(map[string]interface{})
-		expected := schema["expected"].(map[string]interface{})
-		initial := schema["initial"].(map[string]interface{})
-		gen.UnderscoreFields(initial)
-		assert.EqualValues(t, expected, initial)
-	}
 }
 
 func TestCombineSchemas(t *testing.T) {

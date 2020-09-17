@@ -16,20 +16,20 @@ package gen
 
 import (
 	"bytes"
-	"path/filepath"
-
 	"github.com/pkg/errors"
+	"github.com/pulumi/pulumi/pkg/v2/codegen"
 	go_gen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
+	"path/filepath"
 )
 
-var unneededGoFiles = []string{
+var unneededGoFiles = codegen.NewStringSet(
 	"doc.go",
 	"provider.go",
 	"meta/v1/pulumiTypes.go",
-}
+)
 
-func (pg *PackageGenerator) genGo(outputDir string) error {
-	if files, err := pg.genGoFiles(); err != nil {
+func (pg *PackageGenerator) genGo(outputDir, name string) error {
+	if files, err := pg.genGoFiles(name); err != nil {
 		return err
 	} else if err := writeFiles(files, outputDir); err != nil {
 		return err
@@ -37,9 +37,11 @@ func (pg *PackageGenerator) genGo(outputDir string) error {
 	return nil
 }
 
-func (pg *PackageGenerator) genGoFiles() (map[string]*bytes.Buffer, error) {
+func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
+	oldName := pkg.Name
+	pkg.Name = name
 	moduleToPackage := pg.moduleToPackage()
 	moduleToPackage["meta/v1"] = "meta/v1"
 	pkg.Language["go"] = rawMessage(map[string]interface{}{
@@ -55,21 +57,16 @@ func (pg *PackageGenerator) genGoFiles() (map[string]*bytes.Buffer, error) {
 		return nil, errors.Wrap(err, "could not generate Go package")
 	}
 
+	pkg.Name = oldName
 	delete(pkg.Language, Go)
 
 	buffers := map[string]*bytes.Buffer{}
 
-	// Now we remove the "crds/" file path prefix
 	for path, code := range files {
-		newPath, err := filepath.Rel(packageName, path)
-		if err != nil {
-			return nil, errors.Wrapf(err, "could not remove \"crds/\" prefix")
+		newPath, _ := filepath.Rel(name, path)
+		if !unneededGoFiles.Has(newPath) {
+			buffers[newPath] = bytes.NewBuffer(code)
 		}
-		buffers[newPath] = bytes.NewBuffer(code)
-	}
-
-	for _, unneededFile := range unneededGoFiles {
-		delete(buffers, unneededFile)
 	}
 
 	return buffers, nil
