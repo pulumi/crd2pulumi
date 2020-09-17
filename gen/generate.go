@@ -42,39 +42,7 @@ const (
 )
 
 // Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS.
-var Version string
-
-// LanguageSettings contains the output paths for each language. If a path is
-// null, then that language will not be generated at all.
-type LanguageSettings struct {
-	NodeJSPath *string
-	PythonPath *string
-	DotNetPath *string
-	GoPath     *string
-}
-
-// Returns true if at least one of the language-specific output paths already exists. If true, then a slice of the
-// paths that already exist are also returned.
-func (ls LanguageSettings) hasExistingPaths() (bool, []string) {
-	pathExists := func(path string) bool {
-		_, err := os.Stat(path)
-		return !os.IsNotExist(err)
-	}
-	var existingPaths []string
-	if ls.NodeJSPath != nil && pathExists(*ls.NodeJSPath) {
-		existingPaths = append(existingPaths, *ls.NodeJSPath)
-	}
-	if ls.PythonPath != nil && pathExists(*ls.PythonPath) {
-		existingPaths = append(existingPaths, *ls.PythonPath)
-	}
-	if ls.DotNetPath != nil && pathExists(*ls.DotNetPath) {
-		existingPaths = append(existingPaths, *ls.DotNetPath)
-	}
-	if ls.GoPath != nil && pathExists(*ls.GoPath) {
-		existingPaths = append(existingPaths, *ls.GoPath)
-	}
-	return len(existingPaths) > 0, existingPaths
-}
+var Version string = "1.0.0"
 
 // Generate parses the CRDs at the given yamlPaths and outputs the generated
 // code according to the language settings. Only overwrites existing files if
@@ -92,22 +60,22 @@ func Generate(ls LanguageSettings, yamlPaths []string, force bool) error {
 	}
 
 	if ls.NodeJSPath != nil {
-		if err := pg.genNodeJS(*ls.NodeJSPath); err != nil {
+		if err := pg.genNodeJS(*ls.NodeJSPath, ls.NodeJSName); err != nil {
 			return err
 		}
 	}
 	if ls.PythonPath != nil {
-		if err := pg.genPython(*ls.PythonPath); err != nil {
+		if err := pg.genPython(*ls.PythonPath, ls.PythonName); err != nil {
 			return err
 		}
 	}
 	if ls.GoPath != nil {
-		if err := pg.genGo(*ls.GoPath); err != nil {
+		if err := pg.genGo(*ls.GoPath, ls.GoName); err != nil {
 			return err
 		}
 	}
 	if ls.DotNetPath != nil {
-		if err := pg.genDotNet(*ls.DotNetPath); err != nil {
+		if err := pg.genDotNet(*ls.DotNetPath, ls.DotNetName); err != nil {
 			return err
 		}
 	}
@@ -169,6 +137,10 @@ func NewPackageGenerator(yamlPaths []string) (PackageGenerator, error) {
 	crds, err := UnmarshalYamls(yamlFiles)
 	if err != nil {
 		return PackageGenerator{}, errors.Wrapf(err, "could not unmarshal yaml file(s)")
+	}
+
+	if len(crds) == 0 {
+		return PackageGenerator{}, errors.New("could not find any CRD YAML files")
 	}
 
 	resourceTokensSize := 0
@@ -234,6 +206,16 @@ func (pg *PackageGenerator) moduleToPackage() map[string]string {
 	return moduleToPackage
 }
 
+// HasSchemas returns true if there exists at least one CustomResource with a schema in this package.
+func (pg *PackageGenerator) HasSchemas() bool {
+	for _, crg := range pg.CustomResourceGenerators {
+		if crg.HasSchemas() {
+			return true
+		}
+	}
+	return false
+}
+
 // CustomResourceGenerator generates a Pulumi schema for a single CustomResource
 type CustomResourceGenerator struct {
 	// CustomResourceDefinition contains the unmarshalled CRD YAML
@@ -261,21 +243,28 @@ type CustomResourceGenerator struct {
 
 func NewCustomResourceGenerator(crd unstruct.Unstructured) (CustomResourceGenerator, error) {
 	apiVersion := crd.GetAPIVersion()
-
 	schemas := map[string]map[string]interface{}{}
+
 	validation, foundValidation, _ := unstruct.NestedMap(crd.Object, "spec", "validation", "openAPIV3Schema")
 	if foundValidation { // If present, use the top-level schema to validate all versions
-		versionMaps, _, _ := NestedMapSlice(crd.Object, "spec", "versions")
-		for _, version := range versionMaps {
-			name, _, _ := unstruct.NestedString(version, "name")
-			schemas[name] = validation
+		versionName, foundVersionName, _ := unstruct.NestedString(crd.Object, "spec", "version")
+		if foundVersionName {
+			schemas[versionName] = validation
+		} else if versionInfos, foundVersionInfos, _ := NestedMapSlice(crd.Object, "spec", "versions"); foundVersionInfos {
+			for _, versionInfo := range versionInfos {
+				versionName, _, _ := unstruct.NestedString(versionInfo, "name")
+				schemas[versionName] = validation
+			}
 		}
 	} else { // Otherwise use per-version schemas to validate each version
-		versionMaps, _, _ := NestedMapSlice(crd.Object, "spec", "versions")
-		for _, version := range versionMaps {
-			name, _, _ := unstruct.NestedString(version, "name")
-			schema, _, _ := unstruct.NestedMap(version, "schema", "openAPIV3Schema")
-			schemas[name] = schema
+		versionInfos, foundVersionInfos, _ := NestedMapSlice(crd.Object, "spec", "versions")
+		if foundVersionInfos {
+			for _, version := range versionInfos {
+				name, _, _ := unstruct.NestedString(version, "name")
+				if schema, foundSchema, _ := unstruct.NestedMap(version, "schema", "openAPIV3Schema"); foundSchema {
+					schemas[name] = schema
+				}
+			}
 		}
 	}
 
@@ -314,6 +303,11 @@ func NewCustomResourceGenerator(crd unstruct.Unstructured) (CustomResourceGenera
 	}
 
 	return crg, nil
+}
+
+// HasSchemas returns true if the CustomResource specifies at least some schema, and false otherwise.
+func (crg *CustomResourceGenerator) HasSchemas() bool {
+	return len(crg.Schemas) > 0
 }
 
 // Returns the type token for a Kubernetes CustomResource with the given group,

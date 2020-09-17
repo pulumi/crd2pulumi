@@ -16,13 +16,8 @@ package gen
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
-	"path/filepath"
-
 	"github.com/pkg/errors"
 	"github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
-	"github.com/pulumi/pulumi/sdk/v2/go/common/util/contract"
 )
 
 const nodejsMetaPath = "meta/v1.ts"
@@ -31,8 +26,8 @@ const nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
 export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
 `
 
-func (pg *PackageGenerator) genNodeJS(outputDir string) error {
-	if files, err := pg.genNodeJSFiles(); err != nil {
+func (pg *PackageGenerator) genNodeJS(outputDir string, name string) error {
+	if files, err := pg.genNodeJSFiles(name); err != nil {
 		return err
 	} else if err := writeFiles(files, outputDir); err != nil {
 		return err
@@ -40,9 +35,11 @@ func (pg *PackageGenerator) genNodeJS(outputDir string) error {
 	return nil
 }
 
-func (pg *PackageGenerator) genNodeJSFiles() (map[string]*bytes.Buffer, error) {
+func (pg *PackageGenerator) genNodeJSFiles(name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage()
 
+	oldName := pkg.Name
+	pkg.Name = name
 	pkg.Language["nodejs"] = rawMessage(map[string]interface{}{
 		"moduleToPackage": pg.moduleToPackage(),
 	})
@@ -52,6 +49,7 @@ func (pg *PackageGenerator) genNodeJSFiles() (map[string]*bytes.Buffer, error) {
 		return nil, errors.Wrap(err, "could not generate nodejs package")
 	}
 
+	pkg.Name = oldName
 	delete(pkg.Language, NodeJS)
 
 	// Remove ${VERSION} in package.json
@@ -74,64 +72,5 @@ func (pg *PackageGenerator) genNodeJSFiles() (map[string]*bytes.Buffer, error) {
 		buffers[name] = bytes.NewBuffer(code)
 	}
 
-	// Generates CustomResourceDefinition constructors. Soon this will be
-	// replaced with `kube2pulumi`
-	for _, crg := range pg.CustomResourceGenerators {
-		if !IsValidAPIVersion(crg.APIVersion) {
-			continue
-		}
-
-		definitionFileName := toLowerFirst(crg.Kind) + "Definition"
-
-		// Create the customResourceDefinition.ts class
-		path := filepath.Join(groupPrefix(crg.Group), definitionFileName+".ts")
-		_, ok := buffers[path]
-		contract.Assertf(!ok, "duplicate file at %s", path)
-		buffer := &bytes.Buffer{}
-		crg.genNodeJSDefinition(buffer)
-		buffers[path] = buffer
-
-		// Export in the index.ts file
-		indexPath := filepath.Join(filepath.Dir(path), "index.ts")
-		indexBuffer := buffers[indexPath]
-		definitionClassName := crg.Kind + "Definition"
-		exportCode := fmt.Sprintf(
-			"import {%s} from \"./%s\";\nexport {%s};\n",
-			definitionClassName,
-			definitionFileName,
-			definitionClassName,
-		)
-		indexBuffer.WriteString(exportCode)
-	}
-
 	return buffers, nil
-}
-
-const definitionImports = `import * as pulumi from "@pulumi/pulumi";
-import * as k8s from "@pulumi/kubernetes";
-
-`
-
-// Outputs the code for a CustomResourceDefinition class to the given buffer.
-// Mutates crg.CustomResourceDefinition.Object by underscoring all hyphenated
-// fields.
-func (crg *CustomResourceGenerator) genNodeJSDefinition(buffer *bytes.Buffer) {
-	className := crg.Kind + "Definition"
-	var superClassName string
-	if crg.APIVersion == v1 {
-		superClassName = "k8s.apiextensions.v1.CustomResourceDefinition"
-	} else {
-		superClassName = "k8s.apiextensions.v1beta1.CustomResourceDefinition"
-	}
-
-	fmt.Fprint(buffer, definitionImports)
-	fmt.Fprintf(buffer, "export class %s extends %s {\n", className, superClassName)
-	fmt.Fprint(buffer, "\tconstructor(name: string, opts?: pulumi.CustomResourceOptions) {\n")
-	fmt.Fprint(buffer, "\t\tsuper(name, ")
-
-	UnderscoreFields(crg.CustomResourceDefinition.Object)
-	definitionArgs, _ := json.MarshalIndent(crg.CustomResourceDefinition.Object, "\t\t", "\t")
-	buffer.Write(definitionArgs)
-
-	fmt.Fprint(buffer, ", opts)\n\t}\n}\n")
 }

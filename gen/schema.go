@@ -19,13 +19,22 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v2/codegen"
 	pschema "github.com/pulumi/pulumi/pkg/v2/codegen/schema"
 	unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-const packageName = "crds"
+// DefaultName specifies the default value for the package name
+const DefaultName = "crds"
 const tool = "crd2pulumi"
+
+const (
+	Boolean string = "boolean"
+	Integer string = "integer"
+	Number  string = "number"
+	String  string = "string"
+	Array   string = "array"
+	Object  string = "object"
+)
 
 const anyTypeRef = "pulumi.json#/Any"
 
@@ -37,39 +46,40 @@ var arbitraryJSONTypeSpec = pschema.TypeSpec{
 	AdditionalProperties: &anyTypeSpec,
 }
 
+var emptyObjectSpec = pschema.ObjectTypeSpec{
+	Type: Object,
+	Properties: map[string]pschema.PropertySpec{},
+}
+
 const objectMetaRef = "#/types/kubernetes:meta/v1:ObjectMeta"
 const objectMetaToken = "kubernetes:meta/v1:ObjectMeta"
 
 // Union type of integer and string
 var intOrStringTypeSpec = pschema.TypeSpec{
 	OneOf: []pschema.TypeSpec{
-		pschema.TypeSpec{
+		{
 			Type: Integer,
 		},
-		pschema.TypeSpec{
+		{
 			Type: String,
 		},
 	},
 }
 
-const (
-	Boolean string = "boolean"
-	Integer string = "integer"
-	Number string = "number"
-	String string = "string"
-	Array string = "array"
-	Object string = "object"
-)
-
 func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 	types := map[string]pschema.ObjectTypeSpec{}
-
 	for _, crg := range pg.CustomResourceGenerators {
 		for version, schema := range crg.Schemas {
 			resourceToken := getToken(crg.Group, version, crg.Kind)
 			_, foundProperties, _ := unstruct.NestedMap(schema, "properties")
 			if foundProperties {
 				AddType(schema, resourceToken, types)
+			}
+			preserveUnknownFields, _, _ := unstruct.NestedBool(schema, "x-kubernetes-preserve-unknown-fields")
+			if preserveUnknownFields {
+				types[resourceToken] = emptyObjectSpec
+			}
+			if foundProperties || preserveUnknownFields {
 				types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
 					TypeSpec: pschema.TypeSpec{
 						Type: String,
@@ -90,7 +100,6 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 			}
 		}
 	}
-
 	return types
 }
 
@@ -114,7 +123,7 @@ func genPackage(types map[string]pschema.ObjectTypeSpec, resourceTokens []string
 	}
 
 	pkgSpec := pschema.PackageSpec{
-		Name:      packageName,
+		Name:      DefaultName,
 		Version:   Version,
 		Types:     types,
 		Resources: resources,
@@ -324,35 +333,4 @@ func CombineSchemas(combineRequired bool, schemas ...map[string]interface{}) map
 		combinedSchema["required"] = toInterfaceSlice(combinedRequired)
 	}
 	return combinedSchema
-}
-
-// hyphenedFields contains a set of the hyphened Kubernetes fields
-var hyphenedFields = codegen.NewStringSet(
-	"x-kubernetes-embedded-resource",
-	"x-kubernetes-int-or-string",
-	"x-kubernetes-list-map-keys",
-	"x-kubernetes-list-type",
-	"x-kubernetes-map-type",
-	"x-kubernetes-preserve-unknown-fields",
-)
-
-// UnderscoreFields replaces all hyphens in key names with underscores if the
-// key name is in the `hyphenedFields` set.
-func UnderscoreFields(schema map[string]interface{}) {
-	for field, val := range schema {
-		if hyphenedFields.Has(field) {
-			delete(schema, field)
-			underScoredField := strings.ReplaceAll(field, "-", "_")
-			schema[underScoredField] = val
-		}
-		if subSchema, ok := val.(map[string]interface{}); ok {
-			UnderscoreFields(subSchema)
-		} else if subSchemaSlice, ok := val.([]interface{}); ok {
-			for _, genericSubSchema := range subSchemaSlice {
-				if subSchema, ok = genericSubSchema.(map[string]interface{}); ok {
-					UnderscoreFields(subSchema)
-				}
-			}
-		}
-	}
 }
