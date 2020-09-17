@@ -30,30 +30,30 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-// UnmarshalYamls unmarshals the YAML documents in the given file into a slice
-// of unstruct.Unstructureds, one for each CRD. Returns an error if any
+const CRD = "CustomResourceDefinition"
+
+// UnmarshalYamls un-marshals the YAML documents in the given file into a slice of unstruct.Unstructureds, one for each
+// CRD. Only returns the YAML files for Kubernetes manifests that are CRDs and ignores others. Returns an error if any
 // document failed to unmarshal.
 func UnmarshalYamls(yamlFiles [][]byte) ([]unstruct.Unstructured, error) {
-	var err error
 	var crds []unstruct.Unstructured
-
 	for _, yamlFile := range yamlFiles {
+		var err error
 		dec := yaml.NewYAMLOrJSONDecoder(ioutil.NopCloser(bytes.NewReader(yamlFile)), 128)
 		for err != io.EOF {
 			var value map[string]interface{}
 			if err = dec.Decode(&value); err != nil && err != io.EOF {
 				return nil, errors.Wrap(err, "failed to unmarshal yaml")
 			}
-			if value != nil {
-				crds = append(crds, unstruct.Unstructured{Object: value})
+			if crd := (unstruct.Unstructured{Object: value}); value != nil && crd.GetKind() == CRD {
+				crds = append(crds, crd)
 			}
 		}
 	}
-
 	return crds, nil
 }
 
-// UnmarshalYaml unmarshals one and only one YAML document from a file
+// UnmarshalYaml un-marshals one and only one YAML document from a file
 func UnmarshalYaml(yamlFile []byte) (map[string]interface{}, error) {
 	dec := yaml.NewYAMLOrJSONDecoder(ioutil.NopCloser(bytes.NewReader(yamlFile)), 128)
 	var value map[string]interface{}
@@ -91,9 +91,9 @@ func jsonPath(fields []string) string {
 }
 
 func rawMessage(v interface{}) json.RawMessage {
-	bytes, err := json.Marshal(v)
+	rawBytes, err := json.Marshal(v)
 	contract.Assert(err == nil)
-	return bytes
+	return rawBytes
 }
 
 var alphanumericRegex = regexp.MustCompile("[^a-zA-Z0-9]+")

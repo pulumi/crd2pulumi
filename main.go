@@ -15,12 +15,16 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/pulumi/crd2pulumi/cmd"
 )
 
 func main() {
 	err := cmd.Execute()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(-1)
 	}
 }

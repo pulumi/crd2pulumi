@@ -39,7 +39,14 @@ const (
 	PythonPath string = "pythonPath"
 )
 
-var defaultOutputPath = "crds/"
+const (
+	DotNetName string = "dotnetName"
+	GoName     string = "goName"
+	NodeJSName string = "nodejsName"
+	PythonName string = "pythonName"
+)
+
+const defaultOutputPath = "crds/"
 
 const long = `crd2pulumi is a CLI tool that generates typed Kubernetes 
 CustomResources to use in Pulumi programs, based on a
@@ -53,7 +60,9 @@ Notice that by just setting a language-specific output path (--pythonPath, --nod
 still get generated, so setting -p, -n, etc becomes unnecessary.
 `
 
-func getLanguageSettings(flags *pflag.FlagSet) gen.LanguageSettings {
+// NewLanguageSettings returns the parsed language settings given a set of flags. Also returns a list of notices for
+// possibly misinterpreted flags.
+func NewLanguageSettings(flags *pflag.FlagSet) (gen.LanguageSettings, []string) {
 	nodejs, _ := flags.GetBool(NodeJS)
 	python, _ := flags.GetBool(Python)
 	dotnet, _ := flags.GetBool(DotNet)
@@ -64,32 +73,55 @@ func getLanguageSettings(flags *pflag.FlagSet) gen.LanguageSettings {
 	dotnetPath, _ := flags.GetString(DotNetPath)
 	goPath, _ := flags.GetString(GoPath)
 
-	ls := gen.LanguageSettings{}
+	nodejsName, _ := flags.GetString(NodeJSName)
+	pythonName, _ := flags.GetString(PythonName)
+	dotNetName, _ := flags.GetString(DotNetName)
+	goName, _ := flags.GetString(GoName)
+
+	var notices []string
+	ls := gen.LanguageSettings{
+		NodeJSName: nodejsName,
+		PythonName: pythonName,
+		DotNetName: dotNetName,
+		GoName:     goName,
+	}
 	if nodejsPath != "" {
 		ls.NodeJSPath = &nodejsPath
-	} else if nodejs {
+		if nodejs {
+			notices = append(notices, "-n is not necessary if --nodejsPath is already set")
+		}
+	} else if nodejs || nodejsName != gen.DefaultName {
 		path := filepath.Join(defaultOutputPath, NodeJS)
 		ls.NodeJSPath = &path
 	}
 	if pythonPath != "" {
 		ls.PythonPath = &pythonPath
-	} else if python {
+		if python {
+			notices = append(notices, "-p is not necessary if --pythonPath is already set")
+		}
+	} else if python || pythonName != gen.DefaultName {
 		path := filepath.Join(defaultOutputPath, Python)
 		ls.PythonPath = &path
 	}
 	if dotnetPath != "" {
 		ls.DotNetPath = &dotnetPath
-	} else if dotnet {
+		if dotnet {
+			notices = append(notices, "-d is not necessary if --dotnetPath is already set")
+		}
+	} else if dotnet || dotNetName != gen.DefaultName {
 		path := filepath.Join(defaultOutputPath, DotNet)
 		ls.DotNetPath = &path
 	}
 	if goPath != "" {
 		ls.GoPath = &goPath
-	} else if golang {
+		if golang {
+			notices = append(notices, "-g is not necessary if --goPath is already set")
+		}
+	} else if golang || goName != gen.DefaultName{
 		path := filepath.Join(defaultOutputPath, Go)
 		ls.GoPath = &path
 	}
-	return ls
+	return ls, notices
 }
 
 var (
@@ -100,8 +132,7 @@ var (
 		Example: example,
 		Version: gen.Version,
 		Args: func(cmd *cobra.Command, args []string) error {
-			emptyLanguageSettings := gen.LanguageSettings{}
-			if getLanguageSettings(cmd.Flags()) == emptyLanguageSettings {
+			if ls, _ := NewLanguageSettings(cmd.Flags()); !ls.GeneratesAtLeastOneLanguage() {
 				return errors.New("must specify at least one language")
 			}
 
@@ -114,9 +145,12 @@ var (
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			force, _ := cmd.Flags().GetBool("force")
-			languageSettings := getLanguageSettings(cmd.Flags())
+			ls, notices := NewLanguageSettings(cmd.Flags())
+			for _, notice := range notices {
+				fmt.Println("notice: " + notice)
+			}
 
-			err := gen.Generate(languageSettings, args, force)
+			err := gen.Generate(ls, args, force)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error: %v\n", err)
 				os.Exit(-1)
@@ -134,17 +168,31 @@ func Execute() error {
 var forceValue bool
 var nodeJSValue, pythonValue, dotNetValue, goValue bool
 var nodeJSPathValue, pythonPathValue, dotNetPathValue, goPathValue string
+var nodeJSNameValue, pythonNameValue, dotNetNameValue, goNameValue string
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&nodeJSValue, NodeJS, "n", false, "generate NodeJS")
-	rootCmd.PersistentFlags().BoolVarP(&pythonValue, Python, "p", false, "generate Python")
-	rootCmd.PersistentFlags().BoolVarP(&dotNetValue, DotNet, "d", false, "generate .NET")
-	rootCmd.PersistentFlags().BoolVarP(&goValue, Go, "g", false, "generate Go")
+	addBoolFlag := func(p *bool, name, shorthand string, value bool, usage string) {
+		rootCmd.PersistentFlags().BoolVarP(p, name, shorthand, value, usage)
+	}
 
-	rootCmd.PersistentFlags().StringVar(&nodeJSPathValue, NodeJSPath, "", "optional NodeJS output dir")
-	rootCmd.PersistentFlags().StringVar(&pythonPathValue, PythonPath, "", "optional Python output dir")
-	rootCmd.PersistentFlags().StringVar(&dotNetPathValue, DotNetPath, "", "optional .NET output dir")
-	rootCmd.PersistentFlags().StringVar(&goPathValue, GoPath, "", "optional Go output dir")
+	addBoolFlag(&forceValue, "force", "f", false, "overwrite existing files")
 
-	rootCmd.PersistentFlags().BoolVarP(&forceValue, "force", "f", false, "overwrite existing files")
+	addBoolFlag(&nodeJSValue, NodeJS, "n", false, "generate NodeJS")
+	addBoolFlag(&pythonValue, Python, "p", false, "generate Python")
+	addBoolFlag(&dotNetValue, DotNet, "d", false, "generate .NET")
+	addBoolFlag(&goValue, Go, "g", false, "generate Go")
+
+	addStringFlag := func(p *string, name string, value string, usage string) {
+		rootCmd.PersistentFlags().StringVar(p, name, value, usage)
+	}
+
+	addStringFlag(&nodeJSPathValue, NodeJSPath, "", "optional NodeJS output dir")
+	addStringFlag(&pythonPathValue, PythonPath, "", "optional Python output dir")
+	addStringFlag(&dotNetPathValue, DotNetPath, "", "optional .NET output dir")
+	addStringFlag(&goPathValue, GoPath, "", "optional Go output dir")
+
+	addStringFlag(&nodeJSNameValue, NodeJSName, gen.DefaultName, "name of NodeJS package")
+	addStringFlag(&pythonNameValue, PythonName, gen.DefaultName, "name of Python package")
+	addStringFlag(&dotNetNameValue, DotNetName, gen.DefaultName, "name of .NET package")
+	addStringFlag(&goNameValue, GoName, gen.DefaultName, "name of Go package")
 }
