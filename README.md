@@ -51,17 +51,20 @@ crd2pulumi --pythonPath=crds/python/istio --nodejsPath=crds/nodejs/istio crd-all
 Notice that by just setting a language-specific output path (--pythonPath, --nodejsPath, etc) the code will
 still get generated, so setting -p, -n, etc becomes unnecessary.
 
-
 Flags:
   -d, --dotnet              generate .NET
+      --dotnetName string   name of .NET package (default "crds")
       --dotnetPath string   optional .NET output dir
   -f, --force               overwrite existing files
   -g, --go                  generate Go
+      --goName string       name of Go package (default "crds")
       --goPath string       optional Go output dir
   -h, --help                help for crd2pulumi
   -n, --nodejs              generate NodeJS
+      --nodejsName string   name of NodeJS package (default "crds")
       --nodejsPath string   optional NodeJS output dir
   -p, --python              generate Python
+      --pythonName string   name of Python package (default "crds")
       --pythonPath string   optional Python output dir
 ```
 Setting only a language-specific flag will output the generated code in the default directory; so `-d` will output to 

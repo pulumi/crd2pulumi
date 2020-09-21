@@ -124,13 +124,17 @@ func NewLanguageSettings(flags *pflag.FlagSet) (gen.LanguageSettings, []string) 
 	return ls, notices
 }
 
-var (
-	rootCmd = &cobra.Command{
+var forceValue bool
+var nodeJSValue, pythonValue, dotNetValue, goValue bool
+var nodeJSPathValue, pythonPathValue, dotNetPathValue, goPathValue string
+var nodeJSNameValue, pythonNameValue, dotNetNameValue, goNameValue string
+
+func Execute() error {
+	rootCmd := &cobra.Command{
 		Use:     "crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...]",
 		Short:   "A tool that generates typed Kubernetes CustomResources",
 		Long:    long,
 		Example: example,
-		Version: gen.Version,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if ls, _ := NewLanguageSettings(cmd.Flags()); !ls.GeneratesAtLeastOneLanguage() {
 				return errors.New("must specify at least one language")
@@ -159,40 +163,28 @@ var (
 			fmt.Println("Successfully generated code.")
 		},
 	}
-)
+	rootCmd.PersistentFlags().BoolVarP(&forceValue, "force", "f", false, "overwrite existing files")
+	rootCmd.PersistentFlags().BoolVarP(&nodeJSValue, NodeJS, "n", false, "generate NodeJS")
+	rootCmd.PersistentFlags().BoolVarP(&pythonValue, Python, "p", false, "generate Python")
+	rootCmd.PersistentFlags().BoolVarP(&dotNetValue, DotNet, "d", false, "generate .NET")
+	rootCmd.PersistentFlags().BoolVarP(&goValue, Go, "g", false, "generate Go")
+	rootCmd.PersistentFlags().StringVar(&nodeJSPathValue, NodeJSPath, "", "optional NodeJS output dir")
+	rootCmd.PersistentFlags().StringVar(&pythonPathValue, PythonPath, "", "optional Python output dir")
+	rootCmd.PersistentFlags().StringVar(&dotNetPathValue, DotNetPath, "", "optional .NET output dir")
+	rootCmd.PersistentFlags().StringVar(&goPathValue, GoPath, "", "optional Go output dir")
+	rootCmd.PersistentFlags().StringVar(&nodeJSNameValue, NodeJSName, gen.DefaultName, "name of NodeJS package")
+	rootCmd.PersistentFlags().StringVar(&pythonNameValue, PythonName, gen.DefaultName, "name of Python package")
+	rootCmd.PersistentFlags().StringVar(&dotNetNameValue, DotNetName, gen.DefaultName, "name of .NET package")
+	rootCmd.PersistentFlags().StringVar(&goNameValue, GoName, gen.DefaultName, "name of Go package")
 
-func Execute() error {
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of crd2pulumi",
+		Long:  `All software has versions. This is crd2pulumi's.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(gen.Version)
+		},
+	})
+
 	return rootCmd.Execute()
-}
-
-var forceValue bool
-var nodeJSValue, pythonValue, dotNetValue, goValue bool
-var nodeJSPathValue, pythonPathValue, dotNetPathValue, goPathValue string
-var nodeJSNameValue, pythonNameValue, dotNetNameValue, goNameValue string
-
-func init() {
-	addBoolFlag := func(p *bool, name, shorthand string, value bool, usage string) {
-		rootCmd.PersistentFlags().BoolVarP(p, name, shorthand, value, usage)
-	}
-
-	addBoolFlag(&forceValue, "force", "f", false, "overwrite existing files")
-
-	addBoolFlag(&nodeJSValue, NodeJS, "n", false, "generate NodeJS")
-	addBoolFlag(&pythonValue, Python, "p", false, "generate Python")
-	addBoolFlag(&dotNetValue, DotNet, "d", false, "generate .NET")
-	addBoolFlag(&goValue, Go, "g", false, "generate Go")
-
-	addStringFlag := func(p *string, name string, value string, usage string) {
-		rootCmd.PersistentFlags().StringVar(p, name, value, usage)
-	}
-
-	addStringFlag(&nodeJSPathValue, NodeJSPath, "", "optional NodeJS output dir")
-	addStringFlag(&pythonPathValue, PythonPath, "", "optional Python output dir")
-	addStringFlag(&dotNetPathValue, DotNetPath, "", "optional .NET output dir")
-	addStringFlag(&goPathValue, GoPath, "", "optional Go output dir")
-
-	addStringFlag(&nodeJSNameValue, NodeJSName, gen.DefaultName, "name of NodeJS package")
-	addStringFlag(&pythonNameValue, PythonName, gen.DefaultName, "name of Python package")
-	addStringFlag(&dotNetNameValue, DotNetName, gen.DefaultName, "name of .NET package")
-	addStringFlag(&goNameValue, GoName, gen.DefaultName, "name of Go package")
 }
