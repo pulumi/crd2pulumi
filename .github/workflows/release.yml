@@ -11,6 +11,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Unshallow clone
         run: git fetch --prune --unshallow --tags
+      - name: Install pulumictl
+        uses: jaxxstorm/action-install-gh-release@release/v1-alpha
+        with:
+          repo: pulumi/pulumictl
       - name: Install Go 1.14
         uses: actions/setup-go@v2
         with:
@@ -22,3 +26,9 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+      - name: Chocolatey Package Deployment
+        run: |
+          CURRENT_TAG=v$(pulumictl get version --language generic -o)
+          pulumictl create choco-deploy -a crd2pulumi v${CURRENT_TAG}
+
+
