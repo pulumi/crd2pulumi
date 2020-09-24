@@ -41,8 +41,8 @@ const (
 	v1      string = "apiextensions.k8s.io/v1"
 )
 
-// Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS.
-var Version string = "1.0.0"
+// Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS. This defaults to dev
+var Version string = "dev"
 
 // Generate parses the CRDs at the given yamlPaths and outputs the generated
 // code according to the language settings. Only overwrites existing files if
