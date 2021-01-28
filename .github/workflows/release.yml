@@ -3,6 +3,9 @@ on:
   push:
     tags: [ "v*.[0-99]" ] # only a valid semver tag
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -29,6 +32,6 @@ jobs:
       - name: Chocolatey Package Deployment
         run: |
           CURRENT_TAG=v$(pulumictl get version --language generic -o)
-          pulumictl create choco-deploy -a crd2pulumi v${CURRENT_TAG}
+          pulumictl create choco-deploy -a crd2pulumi ${CURRENT_TAG}
 
 
