@@ -25,7 +25,7 @@ changelog:
 brews:
   -
     name: crd2pulumi
-    github:
+    tap:
       owner: pulumi
       name: homebrew-tap
     commit_author:
