@@ -24,8 +24,8 @@ import (
 	"unicode"
 
 	"github.com/pkg/errors"
-	pschema "github.com/pulumi/pulumi/pkg/v2/codegen/schema"
-	"github.com/pulumi/pulumi/sdk/v2/go/common/util/contract"
+	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 	unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -113,8 +113,8 @@ type PackageGenerator struct {
 	// GroupVersions is a slice of the names of every CustomResource's versions,
 	// in the format <group>/<version>
 	GroupVersions []string
-	// Types is a mapping from every type's token name to its ObjectTypeSpec
-	Types map[string]pschema.ObjectTypeSpec
+	// Types is a mapping from every type's token name to its ComplexTypeSpec
+	Types map[string]pschema.ComplexTypeSpec
 	// schemaPackage is the Pulumi schema package used to generate code for
 	// languages that do not need an ObjectMeta type (NodeJS)
 	schemaPackage *pschema.Package

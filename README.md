@@ -145,7 +145,7 @@ import (
 	crontabs_v1 "crds-go-final/crontabs/stable/v1"
 
 	meta_v1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
-	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func main() {

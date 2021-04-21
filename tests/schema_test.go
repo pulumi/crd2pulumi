@@ -21,7 +21,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/pulumi/crd2pulumi/gen"
-	pschema "github.com/pulumi/pulumi/pkg/v2/codegen/schema"
+	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,7 +88,7 @@ func TestGetTypeSpec(t *testing.T) {
 	// the pschema.TypeSpec. Since our initial name arg is "", this causes all
 	// objects to have the ref "#/types/"
 	getOnlyTypeSpec := func(schema map[string]interface{}) pschema.TypeSpec {
-		placeholderTypes := map[string]pschema.ObjectTypeSpec{}
+		placeholderTypes := map[string]pschema.ComplexTypeSpec{}
 		return gen.GetTypeSpec(schema, "", placeholderTypes)
 	}
 

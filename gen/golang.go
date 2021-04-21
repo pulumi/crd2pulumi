@@ -17,8 +17,8 @@ package gen
 import (
 	"bytes"
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v2/codegen"
-	go_gen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
+	"github.com/pulumi/pulumi/pkg/v3/codegen"
+	go_gen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
 	"path/filepath"
 )
 

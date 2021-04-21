@@ -17,7 +17,7 @@ package gen
 import (
 	"bytes"
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
 )
 
 const nodejsMetaPath = "meta/v1.ts"

@@ -1,10 +1,9 @@
 PROJECT          := github.com/pulumi/crd2pulumi
 
 GO              ?= go
-GOMODULE = GO111MODULE=on
 
 ensure::
-	$(GOMODULE) $(GO) mod tidy
+	$(GO) mod download
 
 build::
-	$(GOMODULE) $(GO) build $(PROJECT)
+	$(GO) build $(PROJECT)
