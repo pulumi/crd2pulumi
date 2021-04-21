@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	pschema "github.com/pulumi/pulumi/pkg/v2/codegen/schema"
+	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -46,9 +46,11 @@ var arbitraryJSONTypeSpec = pschema.TypeSpec{
 	AdditionalProperties: &anyTypeSpec,
 }
 
-var emptyObjectSpec = pschema.ObjectTypeSpec{
-	Type: Object,
-	Properties: map[string]pschema.PropertySpec{},
+var emptySpec = pschema.ComplexTypeSpec{
+	ObjectTypeSpec: pschema.ObjectTypeSpec{
+		Type:       Object,
+		Properties: map[string]pschema.PropertySpec{},
+	},
 }
 
 const objectMetaRef = "#/types/kubernetes:meta/v1:ObjectMeta"
@@ -66,8 +68,8 @@ var intOrStringTypeSpec = pschema.TypeSpec{
 	},
 }
 
-func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
-	types := map[string]pschema.ObjectTypeSpec{}
+func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
+	types := map[string]pschema.ComplexTypeSpec{}
 	for _, crg := range pg.CustomResourceGenerators {
 		for version, schema := range crg.Schemas {
 			resourceToken := getToken(crg.Group, version, crg.Kind)
@@ -77,7 +79,7 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 			}
 			preserveUnknownFields, _, _ := unstruct.NestedBool(schema, "x-kubernetes-preserve-unknown-fields")
 			if preserveUnknownFields {
-				types[resourceToken] = emptyObjectSpec
+				types[resourceToken] = emptySpec
 			}
 			if foundProperties || preserveUnknownFields {
 				types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
@@ -106,19 +108,21 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ObjectTypeSpec {
 // Returns the Pulumi package given a types map and a slice of the token types
 // of every CustomResource. If includeObjectMetaType is true, then a
 // ObjectMetaType type is also generated.
-func genPackage(types map[string]pschema.ObjectTypeSpec, resourceTokens []string, includeObjectMetaType bool) (*pschema.Package, error) {
+func genPackage(types map[string]pschema.ComplexTypeSpec, resourceTokens []string, includeObjectMetaType bool) (*pschema.Package, error) {
 	if includeObjectMetaType {
-		types[objectMetaToken] = pschema.ObjectTypeSpec{
-			Type: "object",
+		types[objectMetaToken] = pschema.ComplexTypeSpec{
+			ObjectTypeSpec: pschema.ObjectTypeSpec{
+				Type: "object",
+			},
 		}
 	}
 
 	resources := map[string]pschema.ResourceSpec{}
 	for _, baseRef := range resourceTokens {
-		objectTypeSpec := types[baseRef]
+		complexTypeSpec := types[baseRef]
 		resources[baseRef] = pschema.ResourceSpec{
-			ObjectTypeSpec:  objectTypeSpec,
-			InputProperties: objectTypeSpec.Properties,
+			ObjectTypeSpec:  complexTypeSpec.ObjectTypeSpec,
+			InputProperties: complexTypeSpec.Properties,
 		}
 	}
 
@@ -149,7 +153,7 @@ func isAnyType(typeSpec pschema.TypeSpec) bool {
 // AddType converts the given OpenAPI `schema` to a ObjectTypeSpec and adds it
 // to the `types` map under the given `name`. Recursively converts and adds all
 // nested schemas as well.
-func AddType(schema map[string]interface{}, name string, types map[string]pschema.ObjectTypeSpec) {
+func AddType(schema map[string]interface{}, name string, types map[string]pschema.ComplexTypeSpec) {
 	properties, foundProperties, _ := unstruct.NestedMap(schema, "properties")
 	description, _, _ := unstruct.NestedString(schema, "description")
 	schemaType, _, _ := unstruct.NestedString(schema, "type")
@@ -172,19 +176,20 @@ func AddType(schema map[string]interface{}, name string, types map[string]pschem
 		schemaType = Object
 	}
 
-	types[name] = pschema.ObjectTypeSpec{
+	types[name] = pschema.ComplexTypeSpec{
+		ObjectTypeSpec: pschema.ObjectTypeSpec{
 		Type:        schemaType,
 		Properties:  propertySpecs,
 		Required:    required,
 		Description: description,
-	}
+	}}
 }
 
 // GetTypeSpec returns the corresponding pschema.TypeSpec for a OpenAPI v3
 // schema. Handles nested pschema.TypeSpecs in case the schema type is an array,
 // object, or "combined schema" (oneOf, allOf, anyOf). Also recursively converts
 // and adds all schemas of type object to the types map.
-func GetTypeSpec(schema map[string]interface{}, name string, types map[string]pschema.ObjectTypeSpec) pschema.TypeSpec {
+func GetTypeSpec(schema map[string]interface{}, name string, types map[string]pschema.ComplexTypeSpec) pschema.TypeSpec {
 	if schema == nil {
 		return anyTypeSpec
 	}

@@ -19,8 +19,8 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/python"
-	"github.com/pulumi/pulumi/sdk/v2/go/common/util/contract"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/python"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 )
 
 const pythonMetaFile = `from pulumi_kubernetes.meta.v1._inputs import *

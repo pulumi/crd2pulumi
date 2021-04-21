@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
 )
 
 var unneededDotNetFiles = []string{

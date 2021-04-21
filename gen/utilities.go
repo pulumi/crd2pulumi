@@ -25,7 +25,7 @@ import (
 	"unicode"
 
 	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/sdk/v2/go/common/util/contract"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 	unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
