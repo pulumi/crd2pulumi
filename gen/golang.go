@@ -45,10 +45,10 @@ func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, e
 	moduleToPackage := pg.moduleToPackage()
 	moduleToPackage["meta/v1"] = "meta/v1"
 	pkg.Language["go"] = rawMessage(map[string]interface{}{
-		"importBasePath":  "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes",
+		"importBasePath":  "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes",
 		"moduleToPackage": moduleToPackage,
 		"packageImportAliases": map[string]interface{}{
-			"github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1": "metav1",
+			"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1": "metav1",
 		},
 	})
 

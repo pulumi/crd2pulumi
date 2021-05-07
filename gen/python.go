@@ -45,7 +45,7 @@ func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffe
 		"compatibility":       "kubernetes20",
 		"moduleNameOverrides": pg.moduleToPackage(),
 		"requires": map[string]string{
-			"pulumi":   "\u003e=2.0.0,\u003c3.0.0",
+			"pulumi":   "\u003e=3.0.0,\u003c4.0.0",
 			"pyyaml":   "\u003e=5.1,\u003c5.2",
 			"requests": "\u003e=2.21.0,\u003c2.22.0",
 		},
