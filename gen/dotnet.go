@@ -60,7 +60,7 @@ func (pg *PackageGenerator) genDotNetFiles(name string) (map[string]*bytes.Buffe
 	pkg.Name = name
 	pkg.Language["csharp"] = rawMessage(map[string]interface{}{
 		"packageReferences": map[string]string{
-			"Pulumi.Kubernetes": "2.*",
+			"Pulumi.Kubernetes": "3.*",
 		},
 		"compatibility":          "kubernetes20",
 		"dictionaryConstructors": true,
