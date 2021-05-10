@@ -9,6 +9,7 @@ builds:
       - -X github.com/pulumi/crd2pulumi/gen.Version={{.Tag}}
     goarch:
       - amd64
+      - arm64
     binary: crd2pulumi
     main: ./main.go
 archives:
