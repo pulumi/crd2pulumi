@@ -34,3 +34,7 @@ brews:
       email: bot@pulumi.com
     homepage: "https://pulumi.com"
     description: "Generate typed CustomResources in Pulumi from Kubernetes CRDs"
+    folder: Formula
+    license: Apache-2.0
+    test: |
+      system "#{bin}/crd2pulumi version"
