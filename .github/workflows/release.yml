@@ -31,7 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
       - name: Chocolatey Package Deployment
         run: |
-          CURRENT_TAG=v$(pulumictl get version --language generic -o)
+          CURRENT_TAG=$(pulumictl get version --language generic -o)
           pulumictl create choco-deploy -a crd2pulumi ${CURRENT_TAG}
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
