@@ -7,3 +7,6 @@ ensure::
 
 build::
 	$(GO) build $(PROJECT)
+
+test::
+	$(GO) test -v ./tests/

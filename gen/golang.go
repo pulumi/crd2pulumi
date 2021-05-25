@@ -23,8 +23,12 @@ import (
 )
 
 var unneededGoFiles = codegen.NewStringSet(
+	// The root directory doesn't define any resources:
 	"doc.go",
+	"init.go",
 	"provider.go",
+
+	// We use the standard Kubernetes meta/v1 types, so skip generating them:
 	"meta/v1/pulumiTypes.go",
 )
 
