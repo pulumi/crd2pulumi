@@ -123,11 +123,20 @@ type PackageGenerator struct {
 	schemaPackageWithObjectMetaType *pschema.Package
 }
 
+// Read contents of file, with special case for stdin '-'
+func ReadFileOrStdin(path string) ([]byte, error) {
+	if path == "-" {
+		return ioutil.ReadAll(os.Stdin)
+	} else {
+		return ioutil.ReadFile(path)
+	}
+}
+
 func NewPackageGenerator(yamlPaths []string) (PackageGenerator, error) {
 	yamlFiles := make([][]byte, 0, len(yamlPaths))
 
 	for _, yamlPath := range yamlPaths {
-		yamlFile, err := ioutil.ReadFile(yamlPath)
+		yamlFile, err := ReadFileOrStdin(yamlPath)
 		if err != nil {
 			return PackageGenerator{}, errors.Wrapf(err, "could not read file %s", yamlPath)
 		}
