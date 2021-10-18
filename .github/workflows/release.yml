@@ -1,7 +1,9 @@
 name: release
-on:
+"on":
   push:
-    tags: [ "v*.[0-99]" ] # only a valid semver tag
+    tags:
+      - v*.*.*
+      - '!v*.*.*-**'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
