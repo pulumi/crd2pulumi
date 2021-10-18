@@ -75,8 +75,9 @@ func (pg *PackageGenerator) genDotNetFiles(name string) (map[string]*bytes.Buffe
 	pkg.Name = oldName
 	delete(pkg.Language, "csharp")
 
-	files["KubernetesResource.cs"] = []byte(kubernetesResource(name))
-	files["Utilities.cs"] = []byte(dotNetUtilities(name))
+	namespaceName := dotnet.Title(name)
+	files["KubernetesResource.cs"] = []byte(kubernetesResource(namespaceName))
+	files["Utilities.cs"] = []byte(dotNetUtilities(namespaceName))
 
 	// Delete unneeded files
 	for _, unneededFile := range unneededDotNetFiles {
@@ -162,6 +163,13 @@ namespace Pulumi.` + name + `
             return result;
         }
     }
+
+	internal sealed class ` + name + `ResourceTypeAttribute : Pulumi.ResourceTypeAttribute
+	{
+		public ` + name + `ResourceTypeAttribute(string type) : base(type, Utilities.Version)
+		{
+		}
+	}
 }
 `
 }
