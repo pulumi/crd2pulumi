@@ -18,8 +18,11 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -40,6 +43,10 @@ const (
 	v1beta1 string = "apiextensions.k8s.io/v1beta1"
 	v1      string = "apiextensions.k8s.io/v1"
 )
+
+// fetchUrlRe is a regex to determine whether the requested file should
+// be fetched from a remote or read from the filesystem
+var fetchUrlRe = regexp.MustCompile(`^\w+://`)
 
 // Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS. This defaults to dev
 var Version string = "dev"
@@ -123,6 +130,27 @@ type PackageGenerator struct {
 	schemaPackageWithObjectMetaType *pschema.Package
 }
 
+func FetchFile(u *url.URL) ([]byte, error) {
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", "application/x-yaml")
+	req.Header.Add("Accept", "text/yaml")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to HTTP server: %s", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error getting CRD. Status=%d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
 // Read contents of file, with special case for stdin '-'
 func ReadFileOrStdin(path string) ([]byte, error) {
 	if path == "-" {
@@ -132,11 +160,30 @@ func ReadFileOrStdin(path string) ([]byte, error) {
 	}
 }
 
+func LoadCRD(pathOrUrl string) ([]byte, error) {
+	if fetchUrlRe.MatchString(pathOrUrl) {
+		u, err := url.Parse(pathOrUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		switch u.Scheme {
+		case "https", "http":
+			return FetchFile(u)
+		default:
+			return nil, fmt.Errorf("scheme %q is not supported", u.Scheme)
+		}
+	}
+
+	// If it isn't a http/s scheme, try it as a file
+	return ReadFileOrStdin(pathOrUrl)
+}
+
 func NewPackageGenerator(yamlPaths []string) (PackageGenerator, error) {
 	yamlFiles := make([][]byte, 0, len(yamlPaths))
 
 	for _, yamlPath := range yamlPaths {
-		yamlFile, err := ReadFileOrStdin(yamlPath)
+		yamlFile, err := LoadCRD(yamlPath)
 		if err != nil {
 			return PackageGenerator{}, errors.Wrapf(err, "could not read file %s", yamlPath)
 		}
