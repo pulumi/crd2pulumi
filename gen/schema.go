@@ -15,11 +15,13 @@
 package gen
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/tokens"
 	unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -117,6 +119,7 @@ func genPackage(types map[string]pschema.ComplexTypeSpec, resourceTokens []strin
 		}
 	}
 
+	packages := map[string]bool{DefaultName: true, "kubernetes": true}
 	resources := map[string]pschema.ResourceSpec{}
 	for _, baseRef := range resourceTokens {
 		complexTypeSpec := types[baseRef]
@@ -124,13 +127,21 @@ func genPackage(types map[string]pschema.ComplexTypeSpec, resourceTokens []strin
 			ObjectTypeSpec:  complexTypeSpec.ObjectTypeSpec,
 			InputProperties: complexTypeSpec.Properties,
 		}
+		packages[string(tokens.ModuleMember(baseRef).Package())] = true
 	}
 
+	allowedPackages := make([]string, 0, len(packages))
+	for pkg := range packages {
+		allowedPackages = append(allowedPackages, pkg)
+	}
+	sort.Strings(allowedPackages)
+
 	pkgSpec := pschema.PackageSpec{
-		Name:      DefaultName,
-		Version:   Version,
-		Types:     types,
-		Resources: resources,
+		Name:                DefaultName,
+		Version:             Version,
+		Types:               types,
+		Resources:           resources,
+		AllowedPackageNames: allowedPackages,
 	}
 
 	pkg, err := pschema.ImportSpec(pkgSpec, nil)
@@ -178,11 +189,11 @@ func AddType(schema map[string]interface{}, name string, types map[string]pschem
 
 	types[name] = pschema.ComplexTypeSpec{
 		ObjectTypeSpec: pschema.ObjectTypeSpec{
-		Type:        schemaType,
-		Properties:  propertySpecs,
-		Required:    required,
-		Description: description,
-	}}
+			Type:        schemaType,
+			Properties:  propertySpecs,
+			Required:    required,
+			Description: description,
+		}}
 }
 
 // GetTypeSpec returns the corresponding pschema.TypeSpec for a OpenAPI v3
