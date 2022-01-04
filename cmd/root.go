@@ -55,6 +55,7 @@ CustomResourceDefinition YAML schema.`
 const example = `crd2pulumi --nodejs crontabs.yaml
 crd2pulumi -dgnp crd-certificates.yaml crd-issuers.yaml crd-challenges.yaml
 crd2pulumi --pythonPath=crds/python/istio --nodejsPath=crds/nodejs/istio crd-all.gen.yaml crd-mixer.yaml crd-operator.yaml
+crd2pulumi --pythonPath=crds/python/gke https://raw.githubusercontent.com/GoogleCloudPlatform/gke-managed-certs/master/deploy/managedcertificates-crd.yaml
 
 Notice that by just setting a language-specific output path (--pythonPath, --nodejsPath, etc) the code will
 still get generated, so setting -p, -n, etc becomes unnecessary.
@@ -117,7 +118,7 @@ func NewLanguageSettings(flags *pflag.FlagSet) (gen.LanguageSettings, []string) 
 		if golang {
 			notices = append(notices, "-g is not necessary if --goPath is already set")
 		}
-	} else if golang || goName != gen.DefaultName{
+	} else if golang || goName != gen.DefaultName {
 		path := filepath.Join(defaultOutputPath, Go)
 		ls.GoPath = &path
 	}
