@@ -42,14 +42,21 @@ CustomResourceDefinition YAML schema.
 
 Usage:
   crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...] [flags]
+  crd2pulumi [command]
 
 Examples:
 crd2pulumi --nodejs crontabs.yaml
 crd2pulumi -dgnp crd-certificates.yaml crd-issuers.yaml crd-challenges.yaml
 crd2pulumi --pythonPath=crds/python/istio --nodejsPath=crds/nodejs/istio crd-all.gen.yaml crd-mixer.yaml crd-operator.yaml
+crd2pulumi --pythonPath=crds/python/gke https://raw.githubusercontent.com/GoogleCloudPlatform/gke-managed-certs/master/deploy/managedcertificates-crd.yaml
 
 Notice that by just setting a language-specific output path (--pythonPath, --nodejsPath, etc) the code will
 still get generated, so setting -p, -n, etc becomes unnecessary.
+
+
+Available Commands:
+  help        Help about any command
+  version     Print the version number of crd2pulumi
 
 Flags:
   -d, --dotnet              generate .NET
@@ -66,6 +73,8 @@ Flags:
   -p, --python              generate Python
       --pythonName string   name of Python package (default "crds")
       --pythonPath string   optional Python output dir
+
+Use "crd2pulumi [command] --help" for more information about a command.
 ```
 Setting only a language-specific flag will output the generated code in the default directory; so `-d` will output to 
 `crds/dotnet`, `-g` will output to `crds/go`, `-n` will output to `crds/nodejs`, and `-p` will output to `crds/python`. 
