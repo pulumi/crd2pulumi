@@ -78,9 +78,9 @@ func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffe
 
 	// Import the actual SDK ObjectMeta types in place of our placeholder ones
 	if pg.HasSchemas() {
-		metaPath := filepath.Join(pythonPackageDir, "meta_v1", "__init__.py")
+		metaPath := filepath.Join(pythonPackageDir, "meta/v1", "__init__.py")
 		code, ok := files[metaPath]
-		contract.Assertf(ok, "missing meta_v1/__init__.py file")
+		contract.Assertf(ok, "missing meta/v1/__init__.py file")
 		files[metaPath] = append(code, []byte(pythonMetaFile)...)
 	}
 
