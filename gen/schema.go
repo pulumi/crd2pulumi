@@ -205,6 +205,11 @@ func GetTypeSpec(schema map[string]interface{}, name string, types map[string]ps
 		return anyTypeSpec
 	}
 
+	intOrString, foundIntOrString, _ := unstruct.NestedBool(schema, "x-kubernetes-int-or-string")
+	if foundIntOrString && intOrString {
+		return intOrStringTypeSpec
+	}
+
 	// If the schema is of the `oneOf` type: return a TypeSpec with the `OneOf`
 	// field filled with the TypeSpec of all sub-schemas.
 	oneOf, foundOneOf, _ := NestedMapSlice(schema, "oneOf")
@@ -238,11 +243,6 @@ func GetTypeSpec(schema map[string]interface{}, name string, types map[string]ps
 	if foundAnyOf {
 		combinedSchema := CombineSchemas(false, anyOf...)
 		return GetTypeSpec(combinedSchema, name, types)
-	}
-
-	intOrString, foundIntOrString, _ := unstruct.NestedBool(schema, "x-kubernetes-int-or-string")
-	if foundIntOrString && intOrString {
-		return intOrStringTypeSpec
 	}
 
 	preserveUnknownFields, foundPreserveUnknownFields, _ := unstruct.NestedBool(schema, "x-kubernetes-preserve-unknown-fields")
