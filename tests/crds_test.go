@@ -35,10 +35,14 @@ func execCrd2Pulumi(t *testing.T, lang, path string) {
 	assert.Nil(t, err, "expected to create a temp dir for the CRD output")
 	defer os.RemoveAll(tmpdir)
 	langFlag := "--" + lang + "Path"
-	t.Logf("crd2pulumi %s=%s %s: running", langFlag, tmpdir, path)
-	crdCmd := exec.Command("crd2pulumi", langFlag, tmpdir, "--force", path)
+	binaryPath, err := filepath.Abs("../bin/crd2pulumi")
+	if err != nil {
+		panic(err)
+	}
+	t.Logf("%s %s=%s %s: running", binaryPath, langFlag, tmpdir, path)
+	crdCmd := exec.Command(binaryPath, langFlag, tmpdir, "--force", path)
 	crdOut, err := crdCmd.CombinedOutput()
-	t.Logf("crd2pulumi %s=%s %s: output=\n%s", langFlag, tmpdir, path, crdOut)
+	t.Logf("%s %s=%s %s: output=\n%s", binaryPath, langFlag, tmpdir, path, crdOut)
 	assert.Nil(t, err, "expected crd2pulumi for '%s=%s %s' to succeed", langFlag, tmpdir, path)
 }
 
