@@ -1,5 +1,5 @@
 PROJECT      := github.com/pulumi/crd2pulumi
-VERSION      ?= $(shell (command -v pulumictl && pulumictl get version || echo "0.0.0-dev"))
+VERSION      ?= $(shell (command -v pulumictl > /dev/null && pulumictl get version || echo "0.0.0-dev"))
 VERSION_PATH := gen.Version
 
 GO              ?= go
