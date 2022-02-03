@@ -70,12 +70,6 @@ func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffe
 		delete(files, unneededFile)
 	}
 
-	// Replace _utilities.py with our own hard-coded version
-	utilitiesPath := filepath.Join(pythonPackageDir, "_utilities.py")
-	_, ok := files[utilitiesPath]
-	contract.Assertf(ok, "missing _utilities.py file")
-	files[utilitiesPath] = []byte(pythonUtilitiesFile)
-
 	// Import the actual SDK ObjectMeta types in place of our placeholder ones
 	if pg.HasSchemas() {
 		metaPath := filepath.Join(pythonPackageDir, "meta/v1", "__init__.py")
@@ -90,26 +84,3 @@ func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffe
 	}
 	return buffers, nil
 }
-
-const pythonUtilitiesFile = `from pulumi_kubernetes import _utilities
-
-
-def get_env(*args):
-    return _utilities.get_env(*args)
-
-
-def get_env_bool(*args):
-    return _utilities.get_env_bool(*args)
-
-
-def get_env_int(*args):
-    return _utilities.get_env_int(*args)
-
-
-def get_env_float(*args):
-    return _utilities.get_env_float(*args)
-
-
-def get_version():
-    return _utilities.get_version()
-`
