@@ -2,7 +2,7 @@ CHANGELOG
 =========
 
 ## HEAD (Unreleased)
-_(none)
+- Upgrade to go 1.17 (https://github.com/pulumi/crd2pulumi/pull/75)
 
 ## 1.2.0 (2022-02-07)
 - [python] Do not overwrite _utilities.py (https://github.com/pulumi/crd2pulumi/pull/73/)
