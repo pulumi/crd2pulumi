@@ -19,7 +19,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/pulumi/pulumi/pkg/v3/codegen"
 	go_gen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
-	"path/filepath"
 )
 
 var unneededGoFiles = codegen.NewStringSet(
@@ -50,6 +49,7 @@ func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, e
 	moduleToPackage["meta/v1"] = "meta/v1"
 	pkg.Language["go"] = rawMessage(map[string]interface{}{
 		"importBasePath":  "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes",
+		"rootPackageName": name,
 		"moduleToPackage": moduleToPackage,
 		"packageImportAliases": map[string]interface{}{
 			"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1": "metav1",
@@ -67,9 +67,8 @@ func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, e
 	buffers := map[string]*bytes.Buffer{}
 
 	for path, code := range files {
-		newPath, _ := filepath.Rel(name, path)
-		if !unneededGoFiles.Has(newPath) {
-			buffers[newPath] = bytes.NewBuffer(code)
+		if !unneededGoFiles.Has(path) {
+			buffers[path] = bytes.NewBuffer(code)
 		}
 	}
 
