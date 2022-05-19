@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gen
+package codegen
 
 import (
 	"bytes"
-	"strings"
+	"fmt"
 
-	"github.com/pkg/errors"
+	ijson "github.com/pulumi/crd2pulumi/internal/json"
+	"github.com/pulumi/crd2pulumi/internal/versions"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var unneededDotNetFiles = []string{
@@ -30,24 +33,21 @@ var unneededDotNetFiles = []string{
 	"Provider.cs",
 }
 
-func (pg *PackageGenerator) genDotNet(outputDir, name string) error {
-	if files, err := pg.genDotNetFiles(name); err != nil {
-		return err
-	} else if err := writeFiles(files, outputDir); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (pg *PackageGenerator) genDotNetFiles(name string) (map[string]*bytes.Buffer, error) {
+func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
 	// Set up C# namespaces
 	namespaces := map[string]string{}
 	for _, groupVersion := range pg.GroupVersions {
-		group, version := splitGroupVersion(groupVersion)
-		groupPrefix := groupPrefix(group)
-		namespaces[groupVersion] = strings.Title(groupPrefix) + "." + versionToUpper(version)
+		group, version, err := versions.SplitGroupVersion(groupVersion)
+		if err != nil {
+			return nil, fmt.Errorf("invalid version: %w", err)
+		}
+		groupPrefix, err := versions.GroupPrefix(group)
+		if err != nil {
+			return nil, fmt.Errorf("invalid version: %w", err)
+		}
+		namespaces[groupVersion] = cases.Title(language.Und).String(groupPrefix) + "." + versions.VersionToUpper(version)
 	}
 	namespaces["meta/v1"] = "Meta.V1"
 
@@ -58,7 +58,8 @@ func (pg *PackageGenerator) genDotNetFiles(name string) (map[string]*bytes.Buffe
 	// only get generated properly if `compatibility` was `kubernetes20`.
 	oldName := pkg.Name
 	pkg.Name = name
-	pkg.Language["csharp"] = rawMessage(map[string]interface{}{
+	var err error
+	pkg.Language["csharp"], err = ijson.RawMessage(map[string]any{
 		"packageReferences": map[string]string{
 			"Pulumi.Kubernetes": "3.*",
 		},
@@ -66,10 +67,13 @@ func (pg *PackageGenerator) genDotNetFiles(name string) (map[string]*bytes.Buffe
 		"dictionaryConstructors": true,
 		"namespaces":             namespaces,
 	})
-
-	files, err := dotnet.GeneratePackage(tool, pkg, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not generate .NET package")
+		return nil, fmt.Errorf("failed to marshal JSON message: %w", err)
+	}
+
+	files, err := dotnet.GeneratePackage(PulumiToolName, pkg, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate .NET package: %w", err)
 	}
 
 	pkg.Name = oldName

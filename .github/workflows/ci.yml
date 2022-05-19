@@ -12,10 +12,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install Go 1.16
+      - name: Install Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: '1.16.x'
+          go-version: '1.18.x'
       - name: Run Go Build
         run: |
             go build -ldflags="-X github.com/pulumi/crd2pulumi/gen.Version=0.0.1" -o "${{ github.workspace }}/bin/crd2pulumi" main.go

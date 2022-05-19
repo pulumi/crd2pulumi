@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gen
+package codegen
 
 import (
 	"bytes"
-	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/pkg/v3/codegen"
-	go_gen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
+	"fmt"
 	"path/filepath"
+
+	ijson "github.com/pulumi/crd2pulumi/internal/json"
+	"github.com/pulumi/pulumi/pkg/v3/codegen"
+	goGen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
 )
 
 var unneededGoFiles = codegen.NewStringSet(
@@ -32,40 +34,43 @@ var unneededGoFiles = codegen.NewStringSet(
 	"meta/v1/pulumiTypes.go",
 )
 
-func (pg *PackageGenerator) genGo(outputDir, name string) error {
-	if files, err := pg.genGoFiles(name); err != nil {
-		return err
-	} else if err := writeFiles(files, outputDir); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, error) {
+func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Buffer, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
 	pkg := pg.SchemaPackageWithObjectMetaType()
-
+	langName := "go"
 	oldName := pkg.Name
 	pkg.Name = name
-	moduleToPackage := pg.moduleToPackage()
+	moduleToPackage, err := pg.ModuleToPackage()
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
 	moduleToPackage["meta/v1"] = "meta/v1"
-	pkg.Language["go"] = rawMessage(map[string]interface{}{
+
+	jsonData, err := ijson.RawMessage(map[string]any{
 		"importBasePath":  "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes",
 		"moduleToPackage": moduleToPackage,
-		"packageImportAliases": map[string]interface{}{
+		"packageImportAliases": map[string]any{
 			"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1": "metav1",
 		},
 	})
-
-	files, err := go_gen.GeneratePackage(tool, pkg)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not generate Go package")
+		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
+	}
+	pkg.Language[langName] = jsonData
+
+	files, err := goGen.GeneratePackage("crd2pulumi", pkg)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
 
 	pkg.Name = oldName
-	delete(pkg.Language, Go)
+	delete(pkg.Language, langName)
 
-	buffers := map[string]*bytes.Buffer{}
-
+	buffers = map[string]*bytes.Buffer{}
 	for path, code := range files {
 		newPath, _ := filepath.Rel(name, path)
 		if !unneededGoFiles.Has(newPath) {
@@ -73,5 +78,5 @@ func (pg *PackageGenerator) genGoFiles(name string) (map[string]*bytes.Buffer, e
 		}
 	}
 
-	return buffers, nil
+	return buffers, err
 }
