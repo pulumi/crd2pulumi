@@ -36,6 +36,7 @@ type CodegenSettings struct {
 	PackageName    string
 	PackageVersion string
 	Overwrite      bool
+	ShouldGenerate bool
 }
 
 func (cs *CodegenSettings) Path() string {

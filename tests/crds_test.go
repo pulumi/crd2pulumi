@@ -15,16 +15,14 @@
 package tests
 
 import (
-	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 var languages = []string{"dotnet", "go", "nodejs", "python"}
@@ -33,25 +31,19 @@ const gkeManagedCertsUrl = "https://raw.githubusercontent.com/GoogleCloudPlatfor
 
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string) {
-	dir := filepath.Join(os.TempDir(), fmt.Sprintf("crd2pulumi-tests-%s-%s", time.Now().Local().Format(time.Kitchen), lang))
-	require.NoError(t, os.MkdirAll(dir, 0755))
-	tmpdir, err := os.MkdirTemp(dir, t.Name()+"-*")
+	tmpdir, err := ioutil.TempDir("", "")
 	assert.Nil(t, err, "expected to create a temp dir for the CRD output")
-	if os.Getenv("TEST_SKIP_CLEANUP") != "" {
-		t.Logf("Test output tmp dir: %q\n", tmpdir)
-	} else {
-		defer os.RemoveAll(tmpdir)
-	}
+	defer os.RemoveAll(tmpdir)
+	langFlag := "--" + lang + "Path"
 	binaryPath, err := filepath.Abs("../bin/crd2pulumi")
 	if err != nil {
 		panic(err)
 	}
-	args := []string{"--lang", lang, "--outputDir", tmpdir, "--force", path}
-	t.Logf("running %q %q", binaryPath, args)
-	crdCmd := exec.Command(binaryPath, args...)
+	t.Logf("%s %s=%s %s: running", binaryPath, langFlag, tmpdir, path)
+	crdCmd := exec.Command(binaryPath, langFlag, tmpdir, "--force", path)
 	crdOut, err := crdCmd.CombinedOutput()
-	t.Logf("output=\n%s\n", crdOut)
-	assert.Nil(t, err, "expected no error running crd2pulumi")
+	t.Logf("%s %s=%s %s: output=\n%s", binaryPath, langFlag, tmpdir, path, crdOut)
+	assert.Nil(t, err, "expected crd2pulumi for '%s=%s %s' to succeed", langFlag, tmpdir, path)
 }
 
 // TestCRDsFromFile enumerates all CRD YAML files, and generates them in each language.
