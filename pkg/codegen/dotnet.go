@@ -1,4 +1,4 @@
-// Copyright 2016-2020, Pulumi Corporation.
+// Copyright 2016-2022, Pulumi Corporation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 }
 
 func kubernetesResource(name string) string {
-	return `// Copyright 2016-2020, Pulumi Corporation
+	return `// Copyright 2016-2022, Pulumi Corporation
 namespace Pulumi.` + name + `{
     /// <summary>
     /// A base class for all Kubernetes resources.
