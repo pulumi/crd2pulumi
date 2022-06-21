@@ -15,38 +15,19 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
-	"path/filepath"
 
-	"github.com/pulumi/crd2pulumi/gen"
+	"github.com/pulumi/crd2pulumi/pkg/codegen"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
-const (
-	DotNet string = "dotnet"
-	Go     string = "go"
-	NodeJS string = "nodejs"
-	Python string = "python"
-)
-
-const (
-	DotNetPath string = "dotnetPath"
-	GoPath     string = "goPath"
-	NodeJSPath string = "nodejsPath"
-	PythonPath string = "pythonPath"
-)
-
-const (
-	DotNetName string = "dotnetName"
-	GoName     string = "goName"
-	NodeJSName string = "nodejsName"
-	PythonName string = "pythonName"
-)
-
-const defaultOutputPath = "crds/"
+// Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS. This defaults to dev
+var Version = "dev"
 
 const long = `crd2pulumi is a CLI tool that generates typed Kubernetes 
 CustomResources to use in Pulumi programs, based on a
@@ -61,131 +42,94 @@ Notice that by just setting a language-specific output path (--pythonPath, --nod
 still get generated, so setting -p, -n, etc becomes unnecessary.
 `
 
-// NewLanguageSettings returns the parsed language settings given a set of flags. Also returns a list of notices for
-// possibly misinterpreted flags.
-func NewLanguageSettings(flags *pflag.FlagSet) (gen.LanguageSettings, []string) {
-	nodejs, _ := flags.GetBool(NodeJS)
-	python, _ := flags.GetBool(Python)
-	dotnet, _ := flags.GetBool(DotNet)
-	golang, _ := flags.GetBool(Go)
-
-	nodejsPath, _ := flags.GetString(NodeJSPath)
-	pythonPath, _ := flags.GetString(PythonPath)
-	dotnetPath, _ := flags.GetString(DotNetPath)
-	goPath, _ := flags.GetString(GoPath)
-
-	nodejsName, _ := flags.GetString(NodeJSName)
-	pythonName, _ := flags.GetString(PythonName)
-	dotNetName, _ := flags.GetString(DotNetName)
-	goName, _ := flags.GetString(GoName)
-
-	var notices []string
-	ls := gen.LanguageSettings{
-		NodeJSName: nodejsName,
-		PythonName: pythonName,
-		DotNetName: dotNetName,
-		GoName:     goName,
-	}
-	if nodejsPath != "" {
-		ls.NodeJSPath = &nodejsPath
-		if nodejs {
-			notices = append(notices, "-n is not necessary if --nodejsPath is already set")
-		}
-	} else if nodejs || nodejsName != gen.DefaultName {
-		path := filepath.Join(defaultOutputPath, NodeJS)
-		ls.NodeJSPath = &path
-	}
-	if pythonPath != "" {
-		ls.PythonPath = &pythonPath
-		if python {
-			notices = append(notices, "-p is not necessary if --pythonPath is already set")
-		}
-	} else if python || pythonName != gen.DefaultName {
-		path := filepath.Join(defaultOutputPath, Python)
-		ls.PythonPath = &path
-	}
-	if dotnetPath != "" {
-		ls.DotNetPath = &dotnetPath
-		if dotnet {
-			notices = append(notices, "-d is not necessary if --dotnetPath is already set")
-		}
-	} else if dotnet || dotNetName != gen.DefaultName {
-		path := filepath.Join(defaultOutputPath, DotNet)
-		ls.DotNetPath = &path
-	}
-	if goPath != "" {
-		ls.GoPath = &goPath
-		if golang {
-			notices = append(notices, "-g is not necessary if --goPath is already set")
-		}
-	} else if golang || goName != gen.DefaultName {
-		path := filepath.Join(defaultOutputPath, Go)
-		ls.GoPath = &path
-	}
-	return ls, notices
-}
-
-var forceValue bool
-var nodeJSValue, pythonValue, dotNetValue, goValue bool
-var nodeJSPathValue, pythonPathValue, dotNetPathValue, goPathValue string
-var nodeJSNameValue, pythonNameValue, dotNetNameValue, goNameValue string
-
 func Execute() error {
-	rootCmd := &cobra.Command{
-		Use:     "crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...]",
-		Short:   "A tool that generates typed Kubernetes CustomResources",
-		Long:    long,
-		Example: example,
-		Args: func(cmd *cobra.Command, args []string) error {
-			if ls, _ := NewLanguageSettings(cmd.Flags()); !ls.GeneratesAtLeastOneLanguage() {
-				return errors.New("must specify at least one language")
-			}
+	dotNetSettings := codegen.CodegenSettings{Language: "dotnet"}
+	goSettings := codegen.CodegenSettings{Language: "go"}
+	nodejsSettings := codegen.CodegenSettings{Language: "nodejs"}
+	pythonSettings := codegen.CodegenSettings{Language: "python"}
+	allSettings := []codegen.CodegenSettings{dotNetSettings, goSettings, nodejsSettings, pythonSettings}
 
-			err := cobra.MinimumNArgs(1)(cmd, args)
-			if err != nil {
+	var force bool
+	var packageVersion string
+
+	rootCmd := &cobra.Command{
+		Use:          "crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...]",
+		Short:        "A tool that generates typed Kubernetes CustomResources",
+		Long:         long,
+		Example:      example,
+		SilenceUsage: true, // Don't show the usage message upon program error
+		Args: func(cmd *cobra.Command, args []string) error {
+			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
 				return errors.New("must specify at least one CRD YAML file")
 			}
-
 			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			force, _ := cmd.Flags().GetBool("force")
-			ls, notices := NewLanguageSettings(cmd.Flags())
-			for _, notice := range notices {
-				fmt.Println("notice: " + notice)
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			for _, cs := range allSettings {
+				if force {
+					cs.Overwrite = true
+				}
+				if cs.OutputDir != "" {
+					cs.ShouldGenerate = true
+				}
+				cs.PackageVersion = packageVersion
 			}
-
-			err := gen.Generate(ls, args, force)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				os.Exit(-1)
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var stdinData []byte
+			shouldUseStdin := len(args) == 1 && args[0] == "-"
+			if shouldUseStdin {
+				var err error
+				stdinData, err = io.ReadAll(os.Stdin)
+				if err != nil {
+					return fmt.Errorf("failed reading CRDs from stdin: %w", err)
+				}
 			}
-
-			fmt.Println("Successfully generated code.")
+			for _, cs := range allSettings {
+				if !cs.ShouldGenerate {
+					continue
+				}
+				var err error
+				if shouldUseStdin {
+					err = codegen.Generate(&cs, []io.ReadCloser{ioutil.NopCloser(bytes.NewBuffer(stdinData))})
+				} else {
+					err = codegen.GenerateFromFiles(&cs, args)
+				}
+				if err != nil {
+					return fmt.Errorf("error generating code: %w", err)
+				}
+				fmt.Printf("Successfully generated %s code.\n", cs.Language)
+			}
+			return nil
 		},
 	}
-	rootCmd.PersistentFlags().BoolVarP(&forceValue, "force", "f", false, "overwrite existing files")
-	rootCmd.PersistentFlags().BoolVarP(&nodeJSValue, NodeJS, "n", false, "generate NodeJS")
-	rootCmd.PersistentFlags().BoolVarP(&pythonValue, Python, "p", false, "generate Python")
-	rootCmd.PersistentFlags().BoolVarP(&dotNetValue, DotNet, "d", false, "generate .NET")
-	rootCmd.PersistentFlags().BoolVarP(&goValue, Go, "g", false, "generate Go")
-	rootCmd.PersistentFlags().StringVar(&nodeJSPathValue, NodeJSPath, "", "optional NodeJS output dir")
-	rootCmd.PersistentFlags().StringVar(&pythonPathValue, PythonPath, "", "optional Python output dir")
-	rootCmd.PersistentFlags().StringVar(&dotNetPathValue, DotNetPath, "", "optional .NET output dir")
-	rootCmd.PersistentFlags().StringVar(&goPathValue, GoPath, "", "optional Go output dir")
-	rootCmd.PersistentFlags().StringVar(&nodeJSNameValue, NodeJSName, gen.DefaultName, "name of NodeJS package")
-	rootCmd.PersistentFlags().StringVar(&pythonNameValue, PythonName, gen.DefaultName, "name of Python package")
-	rootCmd.PersistentFlags().StringVar(&dotNetNameValue, DotNetName, gen.DefaultName, "name of .NET package")
-	rootCmd.PersistentFlags().StringVar(&goNameValue, GoName, gen.DefaultName, "name of Go package")
-
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "version",
 		Short: "Print the version number of crd2pulumi",
 		Long:  `All software has versions. This is crd2pulumi's.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(gen.Version)
+			fmt.Println(Version)
 		},
 	})
 
+	f := rootCmd.PersistentFlags()
+	f.BoolVarP(&force, "force", "f", false, "overwrite existing files")
+	f.StringVarP(&packageVersion, "version", "v", "0.0.0-dev", "version of the generated package")
+
+	f.StringVarP(&dotNetSettings.PackageName, "dotnetName", "", codegen.DefaultName, "name of generated .NET package")
+	f.StringVarP(&goSettings.PackageName, "goName", "", codegen.DefaultName, "name of generated Go package")
+	f.StringVarP(&nodejsSettings.PackageName, "nodejsName", "", codegen.DefaultName, "name of generated NodeJS package")
+	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python paclkage")
+
+	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "", "optional .NET output dir")
+	f.StringVarP(&goSettings.OutputDir, "goPath", "", "", "optional Go output dir")
+	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "", "optional NodeJS output dir")
+	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "", "optional Python output dir")
+
+	f.BoolVarP(&dotNetSettings.ShouldGenerate, "dotnet", "d", false, "generate .NET")
+	f.BoolVarP(&goSettings.ShouldGenerate, "go", "g", false, "generate Go")
+	f.BoolVarP(&nodejsSettings.ShouldGenerate, "nodejs", "n", false, "generate NodeJS")
+	f.BoolVarP(&pythonSettings.ShouldGenerate, "python", "p", false, "generate Python")
 	return rootCmd.Execute()
 }

@@ -1,4 +1,4 @@
-// Copyright 2016-2020, Pulumi Corporation.
+// Copyright 2016-2022, Pulumi Corporation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,50 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gen
+package codegen
 
 import (
 	"bytes"
-	"github.com/pkg/errors"
+	"fmt"
+
+	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
 )
 
+const nodejsName = "nodejs"
 const nodejsMetaPath = "meta/v1.ts"
 const nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
 
 export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
 `
 
-func (pg *PackageGenerator) genNodeJS(outputDir string, name string) error {
-	if files, err := pg.genNodeJSFiles(name); err != nil {
-		return err
-	} else if err := writeFiles(files, outputDir); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (pg *PackageGenerator) genNodeJSFiles(name string) (map[string]*bytes.Buffer, error) {
+func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage()
-
 	oldName := pkg.Name
 	pkg.Name = name
-	pkg.Language["nodejs"] = rawMessage(map[string]interface{}{
-		"moduleToPackage": pg.moduleToPackage(),
-	})
-
-	files, err := nodejs.GeneratePackage(tool, pkg, nil)
+	moduleToPackage, err := pg.ModuleToPackage()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not generate nodejs package")
+		return nil, fmt.Errorf("%w", err)
+	}
+	pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
+		"moduleToPackage": moduleToPackage,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate nodejs package: %w", err)
 	}
 
 	pkg.Name = oldName
-	delete(pkg.Language, NodeJS)
+	delete(pkg.Language, nodejsName)
 
 	// Remove ${VERSION} in package.json
 	packageJSON, ok := files["package.json"]
 	if !ok {
-		return nil, errors.New("cannot find generated package.json")
+		return nil, fmt.Errorf("cannot find generated package.json")
 	}
 	files["package.json"] = bytes.ReplaceAll(packageJSON, []byte("${VERSION}"), []byte(""))
 

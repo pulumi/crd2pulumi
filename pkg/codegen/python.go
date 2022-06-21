@@ -1,4 +1,4 @@
-// Copyright 2016-2020, Pulumi Corporation.
+// Copyright 2016-2022, Pulumi Corporation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gen
+package codegen
 
 import (
 	"bytes"
+	"fmt"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/python"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 )
@@ -27,23 +28,20 @@ const pythonMetaFile = `from pulumi_kubernetes.meta.v1._inputs import *
 import pulumi_kubernetes.meta.v1.outputs
 `
 
-func (pg *PackageGenerator) genPython(outputDir, name string) error {
-	if files, err := pg.genPythonFiles(name); err != nil {
-		return err
-	} else if err := writeFiles(files, outputDir); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffer, error) {
+func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
+	langName := "python"
 	oldName := pkg.Name
 	pkg.Name = name
-	pkg.Language[Python] = rawMessage(map[string]interface{}{
+
+	moduleToPackage, err := pg.ModuleToPackage()
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+	pkg.Language[langName], err = ijson.RawMessage(map[string]any{
 		"compatibility":       "kubernetes20",
-		"moduleNameOverrides": pg.moduleToPackage(),
+		"moduleNameOverrides": moduleToPackage,
 		"requires": map[string]string{
 			"pulumi":   "\u003e=3.0.0,\u003c4.0.0",
 			"pyyaml":   "\u003e=5.3",
@@ -51,14 +49,17 @@ func (pg *PackageGenerator) genPythonFiles(name string) (map[string]*bytes.Buffe
 		},
 		"ignorePyNamePanic": true,
 	})
-
-	files, err := python.GeneratePackage(tool, pkg, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not generate Go package")
+		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
+	}
+
+	files, err := python.GeneratePackage(PulumiToolName, pkg, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
 
 	pkg.Name = oldName
-	delete(pkg.Language, Python)
+	delete(pkg.Language, langName)
 
 	pythonPackageDir := "pulumi_" + name
 

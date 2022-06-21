@@ -12,19 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package codegen
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/pulumi/crd2pulumi/cmd"
+	"path/filepath"
 )
 
-func main() {
-	err := cmd.Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+var SupportedLanguages = []string{
+	DotNet,
+	Go,
+	NodeJS,
+	Python,
+}
+
+const DotNet string = "dotnet"
+const Go string = "go"
+const NodeJS string = "nodejs"
+const Python string = "python"
+
+type CodegenSettings struct {
+	Language       string
+	OutputDir      string
+	PackageName    string
+	PackageVersion string
+	Overwrite      bool
+	ShouldGenerate bool
+}
+
+func (cs *CodegenSettings) Path() string {
+	if cs.OutputDir == "" {
+		cs.OutputDir = filepath.Join(cs.PackageName, cs.Language)
 	}
+	return cs.OutputDir
 }
