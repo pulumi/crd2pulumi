@@ -53,7 +53,7 @@ func Execute() error {
 	var packageVersion string
 
 	rootCmd := &cobra.Command{
-		Use:          "crd2pulumi --lang languageName [--outputDir path] [--packageName name] [--force] <crd1.yaml> [crd2.yaml ...]",
+		Use:          "crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...]",
 		Short:        "A tool that generates typed Kubernetes CustomResources",
 		Long:         long,
 		Example:      example,
@@ -130,6 +130,6 @@ func Execute() error {
 	f.BoolVarP(&dotNetSettings.ShouldGenerate, "dotnet", "d", false, "generate .NET")
 	f.BoolVarP(&goSettings.ShouldGenerate, "go", "g", false, "generate Go")
 	f.BoolVarP(&nodejsSettings.ShouldGenerate, "nodejs", "n", false, "generate NodeJS")
-	f.BoolVarP(&pythonSettings.ShouldGenerate, "python", "", false, "generate Python")
+	f.BoolVarP(&pythonSettings.ShouldGenerate, "python", "p", false, "generate Python")
 	return rootCmd.Execute()
 }
