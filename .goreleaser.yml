@@ -1,3 +1,6 @@
+before:
+  hooks:
+    - echo $CGO_ENABLED
 builds:
   - env:
       - CGO_ENABLED=0
@@ -12,6 +15,9 @@ builds:
       - arm64
     binary: crd2pulumi
     main: ./main.go
+    hooks:
+      pre:
+        - echo $CGO_ENABLED
 archives:
   - name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
