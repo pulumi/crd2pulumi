@@ -1,6 +1,6 @@
 before:
   hooks:
-    - echo $CGO_ENABLED
+    - echo "[Before hook] CGO_ENABLED=$CGO_ENABLED"
 builds:
   - env:
       - CGO_ENABLED=0
@@ -17,7 +17,7 @@ builds:
     main: ./main.go
     hooks:
       pre:
-        - echo $CGO_ENABLED
+        - echo "[Build pre hook] CGO_ENABLED=$CGO_ENABLED"
 archives:
   - name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
