@@ -1,8 +1,9 @@
 PROJECT      := github.com/pulumi/crd2pulumi
 VERSION      ?= $(shell (command -v pulumictl > /dev/null && pulumictl get version || echo "0.0.0-dev"))
 VERSION_PATH := cmd.Version
+GO           ?= go
 
-GO              ?= go
+export CGO_ENABLED := 0
 
 all:: ensure build test
 
