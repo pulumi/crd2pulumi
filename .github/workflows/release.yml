@@ -7,6 +7,7 @@ name: release
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CGO_ENABLED: 0
 
 jobs:
   goreleaser:
@@ -32,6 +33,7 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+          CGO_ENABLED: 0
       - name: Chocolatey Package Deployment
         run: |
           CURRENT_TAG=$(pulumictl get version --language generic -o)
