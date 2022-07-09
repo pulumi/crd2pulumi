@@ -6,6 +6,10 @@ on:
   push:
     branches:
       - master
+
+env:
+  CGO_ENABLED: 0
+
 jobs:
   ci:
     runs-on: ubuntu-latest
