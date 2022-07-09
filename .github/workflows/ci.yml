@@ -12,14 +12,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install Go 1.18
         uses: actions/setup-go@v3
         with:
           go-version: '1.18.x'
+
       - name: Run Go Build
         run: |
             go build -ldflags="-X github.com/pulumi/crd2pulumi/gen.Version=0.0.1" -o "${{ github.workspace }}/bin/crd2pulumi" main.go
             echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
+
       - name: Run tests
         run: go test -v .
         working-directory: tests
+
+      - name: Goreleaser publish dry run
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --skip-publish --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+          CGO_ENABLED: 0
