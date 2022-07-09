@@ -6,7 +6,7 @@ builds:
       - windows
       - darwin
     ldflags:
-      - -X github.com/pulumi/crd2pulumi/gen.Version={{.Tag}}
+      - -X github.com/pulumi/crd2pulumi/cmd.Version={{.Tag}}
     goarch:
       - amd64
       - arm64
