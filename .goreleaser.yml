@@ -1,37 +1,54 @@
-before:
-  hooks:
-    - echo "[Before hook] CGO_ENABLED=$CGO_ENABLED"
 builds:
   - env:
       - CGO_ENABLED=0
     goos:
+      - darwin
       - linux
       - windows
-      - darwin
     ldflags:
-      - -X github.com/pulumi/crd2pulumi/gen.Version={{.Tag}}
+      - -X github.com/pulumi/crd2pulumi/cmd.Version={{.Tag}}
     goarch:
       - amd64
       - arm64
     binary: crd2pulumi
     main: ./main.go
-    hooks:
-      pre:
-        - echo "[Build pre hook] CGO_ENABLED=$CGO_ENABLED"
+    overrides:
+      # Some indirect dependencies (rjeczalik/notify, go-ieproxy) require linking against CGO for Darwin.
+      - goos: darwin
+        goarch: arm64
+        goamd64: ""
+        goarm: ""
+        gomips: ""
+        env:
+          - CGO_ENABLED=1
+      - goos: darwin
+        goarch: amd64
+        goamd64: v1
+        goarm: ""
+        gomips: ""
+        env:
+          - CGO_ENABLED=1
+    ignore:
+      - goos: windows
+        goarch: arm64
+
 archives:
   - name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip
+
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   skip: true
+
 brews:
-  -
-    name: crd2pulumi
+  - name: crd2pulumi
     tap:
       owner: pulumi
       name: homebrew-tap
