@@ -32,7 +32,7 @@ jobs:
       #  working-directory: tests
 
       - name: Goreleaser publish dry run
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v2
         with:
           distribution: goreleaser
           version: latest
