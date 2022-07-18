@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Unshallow clone
-        run: git fetch --prune --unshallow --tags
+        with:
+          fetch-depth: 0
       - name: Install pulumictl
         uses: jaxxstorm/action-install-gh-release@v1.1.0
         with:
@@ -38,5 +38,3 @@ jobs:
           pulumictl create choco-deploy -a crd2pulumi ${CURRENT_TAG}
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
-
-
