@@ -43,11 +43,11 @@ still get generated, so setting -p, -n, etc becomes unnecessary.
 `
 
 func Execute() error {
-	dotNetSettings := codegen.CodegenSettings{Language: "dotnet"}
-	goSettings := codegen.CodegenSettings{Language: "go"}
-	nodejsSettings := codegen.CodegenSettings{Language: "nodejs"}
-	pythonSettings := codegen.CodegenSettings{Language: "python"}
-	allSettings := []codegen.CodegenSettings{dotNetSettings, goSettings, nodejsSettings, pythonSettings}
+	dotNetSettings := &codegen.CodegenSettings{Language: "dotnet"}
+	goSettings := &codegen.CodegenSettings{Language: "go"}
+	nodejsSettings := &codegen.CodegenSettings{Language: "nodejs"}
+	pythonSettings := &codegen.CodegenSettings{Language: "python"}
+	allSettings := []*codegen.CodegenSettings{dotNetSettings, goSettings, nodejsSettings, pythonSettings}
 
 	var force bool
 	var packageVersion string
@@ -92,9 +92,9 @@ func Execute() error {
 				}
 				var err error
 				if shouldUseStdin {
-					err = codegen.Generate(&cs, []io.ReadCloser{ioutil.NopCloser(bytes.NewBuffer(stdinData))})
+					err = codegen.Generate(cs, []io.ReadCloser{ioutil.NopCloser(bytes.NewBuffer(stdinData))})
 				} else {
-					err = codegen.GenerateFromFiles(&cs, args)
+					err = codegen.GenerateFromFiles(cs, args)
 				}
 				if err != nil {
 					return fmt.Errorf("error generating code: %w", err)
@@ -122,10 +122,10 @@ func Execute() error {
 	f.StringVarP(&nodejsSettings.PackageName, "nodejsName", "", codegen.DefaultName, "name of generated NodeJS package")
 	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python paclkage")
 
-	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "", "optional .NET output dir")
-	f.StringVarP(&goSettings.OutputDir, "goPath", "", "", "optional Go output dir")
-	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "", "optional NodeJS output dir")
-	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "", "optional Python output dir")
+	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "crds/dotnet", "optional .NET output dir")
+	f.StringVarP(&goSettings.OutputDir, "goPath", "", "crds/go", "optional Go output dir")
+	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "crds/nodejs", "optional NodeJS output dir")
+	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "crds/python", "optional Python output dir")
 
 	f.BoolVarP(&dotNetSettings.ShouldGenerate, "dotnet", "d", false, "generate .NET")
 	f.BoolVarP(&goSettings.ShouldGenerate, "go", "g", false, "generate Go")
