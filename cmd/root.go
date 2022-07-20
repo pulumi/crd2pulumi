@@ -122,10 +122,10 @@ func Execute() error {
 	f.StringVarP(&nodejsSettings.PackageName, "nodejsName", "", codegen.DefaultName, "name of generated NodeJS package")
 	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python paclkage")
 
-	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "crds/dotnet", "optional .NET output dir")
-	f.StringVarP(&goSettings.OutputDir, "goPath", "", "crds/go", "optional Go output dir")
-	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "crds/nodejs", "optional NodeJS output dir")
-	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "crds/python", "optional Python output dir")
+	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "", "optional .NET output dir")
+	f.StringVarP(&goSettings.OutputDir, "goPath", "", "", "optional Go output dir")
+	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "", "optional NodeJS output dir")
+	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "", "optional Python output dir")
 
 	f.BoolVarP(&dotNetSettings.ShouldGenerate, "dotnet", "d", false, "generate .NET")
 	f.BoolVarP(&goSettings.ShouldGenerate, "go", "g", false, "generate Go")
