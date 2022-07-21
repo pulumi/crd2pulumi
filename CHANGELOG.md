@@ -1,7 +1,10 @@
 CHANGELOG
 =========
 
-## 1.2.1 (2022-06-16)
+## 1.2.2 (2022-07-20)
+- Fix regression that caused code in all languages to be generated regardless of selection.
+
+## 1.2.1 (2022-07-19)
 This release is a refactor with no user-affecting changes.
 - Create public interface for codegen in the `pkg/codegen` namespace
   while placing internal utilities under `internal/`
