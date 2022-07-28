@@ -94,9 +94,10 @@ Now let's import the generated code into a Pulumi program that provisions the CR
 ```typescript
 import * as crontabs from "./crontabs"
 import * as pulumi from "@pulumi/pulumi"
+import * as k8s from "@pulumi/kubernetes";
 
 // Register the CronTab CRD.
-const cronTabDefinition = new crontabs.stable.CronTabDefinition("my-crontab-definition")
+const cronTabDefinition = new k8s.yaml.ConfigFile("my-crontab-definition", { file: "resourcedefinition.yaml" });
 
 // Instantiate a CronTab resource.
 const myCronTab = new crontabs.stable.v1.CronTab("my-new-cron-object",
