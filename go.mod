@@ -5,14 +5,18 @@ go 1.18
 require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pulumi/pulumi/pkg/v3 v3.36.0
-	github.com/pulumi/pulumi/sdk/v3 v3.37.2
+	github.com/pulumi/pulumi/sdk/v3 v3.37.3-0.20220809202049-8441ea2eeefd
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.0
 	k8s.io/apimachinery v0.24.3
 )
 
-require golang.org/x/text v0.3.7
+require (
+	github.com/blang/semver v3.5.1+incompatible
+	github.com/pulumi/pulumi-kubernetes/sdk/v3 v3.20.3
+	golang.org/x/text v0.3.7
+)
 
 require (
 	cloud.google.com/go v0.103.0 // indirect
@@ -64,7 +68,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.9 // indirect
 	github.com/aws/smithy-go v1.12.0 // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -170,7 +173,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	gocloud.dev v0.25.0 // indirect
 	gocloud.dev/secrets/hashivault v0.25.0 // indirect
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
