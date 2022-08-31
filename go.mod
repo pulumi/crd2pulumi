@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pulumi/pulumi/pkg/v3 v3.38.1-0.20220831202048-89b976a30cdc
-	github.com/pulumi/pulumi/sdk/v3 v3.37.3-0.20220815162734-24695e84a8e8
+	github.com/pulumi/pulumi/pkg/v3 v3.38.1-0.20220831213913-410495aeba29
+	github.com/pulumi/pulumi/sdk/v3 v3.38.1-0.20220831202048-89b976a30cdc
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.0
