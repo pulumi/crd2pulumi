@@ -1,6 +1,9 @@
 CHANGELOG
 =========
 
+## Unreleased
+- Fix issue [#43: crd properties with - in name](https://github.com/pulumi/crd2pulumi/issues/43) (https://github.com/pulumi/crd2pulumi/pull/99)
+
 ## 1.2.2 (2022-07-20)
 - Fix regression that caused code in all languages to be generated regardless of selection.
 
