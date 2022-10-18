@@ -63,6 +63,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 	pkg.Language[langName] = jsonData
 
 	files, err := goGen.GeneratePackage("crd2pulumi", pkg)
+
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
