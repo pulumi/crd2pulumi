@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-## Unreleased
+## 1.2.3 (2022-10-18)
 - Fix issue [#43: crd properties with - in name](https://github.com/pulumi/crd2pulumi/issues/43) (https://github.com/pulumi/crd2pulumi/pull/99)
 
 ## 1.2.2 (2022-07-20)
@@ -21,15 +21,10 @@ This release is a refactor with no user-affecting changes.
   more appropriately named files or packages.
 - Update to latest Pulumi SDK as well as update all other dependencies.
 - Update to Go 1.18
-
-
-## HEAD (Unreleased)
 - Upgrade to go 1.17 (https://github.com/pulumi/crd2pulumi/pull/75)
 
 ## 1.2.0 (2022-02-07)
 - [python] Do not overwrite _utilities.py (https://github.com/pulumi/crd2pulumi/pull/73/)
-
----
 
 ## 1.1.0 (2022-01-04)
 
