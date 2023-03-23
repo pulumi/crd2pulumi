@@ -1,6 +1,9 @@
 CHANGELOG
 =========
 
+## 1.2.4 (2023-03-23)
+- Fix issue [#108](https://github.com/pulumi/crd2pulumi/issues/108) - crd2pulumi generator splits types apart into duplicate entires in pulumiTypes.go and pulumiTypes1.go
+
 ## 1.2.3 (2022-10-18)
 - Fix issue [#43: crd properties with - in name](https://github.com/pulumi/crd2pulumi/issues/43) (https://github.com/pulumi/crd2pulumi/pull/99)
 
