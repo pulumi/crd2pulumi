@@ -1,6 +1,6 @@
 module github.com/pulumi/crd2pulumi
 
-go 1.18
+go 1.19
 
 require (
 	github.com/pulumi/pulumi/pkg/v3 v3.59.1-0.20230323225522-946074865b11
