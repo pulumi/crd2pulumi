@@ -19,12 +19,11 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/iancoleman/strcase"
 	"github.com/pulumi/crd2pulumi/internal/slices"
 	"github.com/pulumi/crd2pulumi/internal/unstruct"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/tokens"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -141,7 +140,7 @@ func AddType(schema map[string]any, name string, types map[string]pschema.Comple
 		propertyDescription, _, _ := unstructured.NestedString(propertySchema, "description")
 		defaultValue, _, _ := unstructured.NestedFieldNoCopy(propertySchema, "default")
 		propertySpecs[propertyName] = pschema.PropertySpec{
-			TypeSpec:    GetTypeSpec(propertySchema, name+cases.Title(language.Und).String(propertyName), types),
+			TypeSpec:    GetTypeSpec(propertySchema, name+strcase.ToCamel(propertyName), types),
 			Description: propertyDescription,
 			Default:     defaultValue,
 		}

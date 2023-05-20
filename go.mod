@@ -3,6 +3,7 @@ module github.com/pulumi/crd2pulumi
 go 1.19
 
 require (
+	github.com/iancoleman/strcase v0.2.0
 	github.com/pulumi/pulumi/pkg/v3 v3.59.1-0.20230323225522-946074865b11
 	github.com/pulumi/pulumi/sdk/v3 v3.59.1-0.20230323225522-946074865b11
 	github.com/spf13/cobra v1.6.1
@@ -119,7 +120,6 @@ require (
 	github.com/hashicorp/vault/api v1.8.2 // indirect
 	github.com/hashicorp/vault/sdk v0.6.1 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
-	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
