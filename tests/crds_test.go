@@ -15,6 +15,7 @@
 package tests
 
 import (
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -31,14 +32,18 @@ const gkeManagedCertsUrl = "https://raw.githubusercontent.com/GoogleCloudPlatfor
 
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string) {
-	tmpdir, err := ioutil.TempDir("", "")
+	tmpdir, err := ioutil.TempDir("", "crd2pulumi_test")
 	assert.Nil(t, err, "expected to create a temp dir for the CRD output")
-	defer os.RemoveAll(tmpdir)
-	langFlag := "--" + lang + "Path"
+	t.Cleanup(func() {
+		t.Logf("removing temp dir %q for %s test", tmpdir, lang)
+		os.RemoveAll(tmpdir)
+	})
+	langFlag := fmt.Sprintf("--%sPath", lang) // e.g. --dotnetPath
 	binaryPath, err := filepath.Abs("../bin/crd2pulumi")
 	if err != nil {
-		panic(err)
+		t.Fatalf("unable to create absolute path to binary: %s", err)
 	}
+
 	t.Logf("%s %s=%s %s: running", binaryPath, langFlag, tmpdir, path)
 	crdCmd := exec.Command(binaryPath, langFlag, tmpdir, "--force", path)
 	crdOut, err := crdCmd.CombinedOutput()
@@ -51,7 +56,12 @@ func TestCRDsFromFile(t *testing.T) {
 	filepath.WalkDir("crds", func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() && (filepath.Ext(path) == ".yml" || filepath.Ext(path) == ".yaml") {
 			for _, lang := range languages {
-				execCrd2Pulumi(t, lang, path)
+				lang := lang
+				name := fmt.Sprintf("%s-%s", lang, filepath.Base(path))
+				t.Run(name, func(t *testing.T) {
+					t.Parallel()
+					execCrd2Pulumi(t, lang, path)
+				})
 			}
 		}
 		return nil
@@ -61,6 +71,10 @@ func TestCRDsFromFile(t *testing.T) {
 // TestCRDsFromUrl pulls the CRD YAML file from a URL and generates it in each language
 func TestCRDsFromUrl(t *testing.T) {
 	for _, lang := range languages {
-		execCrd2Pulumi(t, lang, gkeManagedCertsUrl)
+		lang := lang
+		t.Run(lang, func(t *testing.T) {
+			t.Parallel()
+			execCrd2Pulumi(t, lang, gkeManagedCertsUrl)
+		})
 	}
 }
