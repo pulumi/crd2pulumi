@@ -1,6 +1,9 @@
 CHANGELOG
 =========
 
+## Unreleased
+- Remove underscores in generated nested types (https://github.com/pulumi/crd2pulumi/pull/114)
+
 ## 1.2.4 (2023-03-23)
 - Requires Go 1.19 or higher now to build
 - Fix issue [#108](https://github.com/pulumi/crd2pulumi/issues/108) - crd2pulumi generator splits types apart into duplicate entires in pulumiTypes.go and pulumiTypes1.go
