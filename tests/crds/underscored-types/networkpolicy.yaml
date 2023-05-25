@@ -1,0 +1,123 @@
+# Ensure generated nested types are not underscored.
+# See https://github.com/pulumi/crd2pulumi/issues/107
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    myinfo: abcdefghijkl
+  generation: 4
+  labels:
+    creator.ac.com: myinfo
+  name: networkpolicies.juice.box.com
+spec:
+  conversion:
+    strategy: None
+  group: juice.box.com
+  names:
+    kind: NetworkPolicy
+    listKind: NetworkPolicyList
+    plural: networkpolicies
+    shortNames:
+      - anp
+      - anps
+    singular: networkpolicy
+  preserveUnknownFields: true
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          properties:
+            spec:
+              type: object
+              description: NetworkPolicySpec is a specification of the network
+                entitlements for a pod.
+              properties:
+                apps_incoming:
+                  description: apps_incoming specifies which applications are permitted
+                    to establish a TCP connection to a POD.
+                  items:
+                    properties:
+                      app:
+                        pattern: ^(__kubernetes__|plb\.juice-plb\.juice-prod|((([A-Za-z0-9]+[-A-Za-z0-9]?)*[A-Za-z0-9])\.){2}(kk|kube))$
+                        type: string
+                      cluster:
+                        description: cluster that this policy applies to. Defaults to
+                          the local cluster. Setting cluster to 'ALL' will match all
+                          clusters
+                        type: string
+                    required:
+                      - app
+                    type: object
+                  type: array
+                apps_outgoing:
+                  description: apps_outgoing specifies what applications a pod may attempt
+                    to make TCP connections to.
+                  items:
+                    properties:
+                      app:
+                        pattern: ^(__kubernetes__|plb\.juice-plb\.juice-prod|((([A-Za-z0-9]+[-A-Za-z0-9]?)*[A-Za-z0-9])\.){2}(kk|kube))$
+                        type: string
+                      cluster:
+                        description: cluster that this policy applies to. Defaults to
+                          the local cluster. Setting cluster to 'ALL' will match all
+                          clusters
+                        type: string
+                    required:
+                      - app
+                    type: object
+                  type: array
+                namespaces_incoming:
+                  description: namespaces_incoming specifies which kubernetes namespace
+                    are permitted to establish incoming TCP sessions.
+                  items:
+                    properties:
+                      cluster:
+                        description: cluster that this policy applies to. Defaults to
+                          the local cluster. Setting cluster to 'ALL' will match all
+                          clusters
+                        type: string
+                      namespace:
+                        pattern: ^(((([A-Za-z0-9]+[-A-Za-z0-9]?)*[A-Za-z0-9])\.)(kk|kube))$
+                        type: string
+                    required:
+                      - namespace
+                    type: object
+                  type: array
+                namespaces_outgoing:
+                  description: namespaces_outgoing specifies which kubernetes namespace
+                    are permitted to establish outgoing TCP sessions.
+                  items:
+                    properties:
+                      cluster:
+                        description: cluster that this policy applies to. Defaults to
+                          the local cluster. Setting cluster to 'ALL' will match all
+                          clusters
+                        type: string
+                      namespace:
+                        pattern: ^(((([A-Za-z0-9]+[-A-Za-z0-9]?)*[A-Za-z0-9])\.)(kk|kube))$
+                        type: string
+                    required:
+                      - namespace
+                    type: object
+                  type: array
+                selector:
+                  additionalProperties:
+                    type: string
+                  description: selector is a set of label selectors
+                  type: object
+              required:
+                - selector
+      served: true
+      storage: true
+status:
+  acceptedNames:
+    kind: NetworkPolicy
+    listKind: NetworkPolicyList
+    plural: networkpolicies
+    shortNames:
+      - anp
+      - anps
+    singular: networkpolicy
+  storedVersions:
+    - v1alpha1
