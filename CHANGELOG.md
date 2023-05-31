@@ -2,6 +2,8 @@ CHANGELOG
 =========
 
 ## Unreleased
+
+## 1.2.5 (2023-05-31)
 - Remove underscores in generated nested types (https://github.com/pulumi/crd2pulumi/pull/114)
 
 ## 1.2.4 (2023-03-23)
