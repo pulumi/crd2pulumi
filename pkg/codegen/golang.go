@@ -17,11 +17,14 @@ package codegen
 import (
 	"bytes"
 	"fmt"
+	"path"
 	"path/filepath"
+	"strings"
 
 	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen"
 	goGen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 )
 
 var unneededGoFiles = codegen.NewStringSet(
@@ -63,9 +66,13 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 	pkg.Language[langName] = jsonData
 
 	files, err := goGen.GeneratePackage("crd2pulumi", pkg)
-
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
+	}
+
+	packageRoot, err := getPackageRoot(pkg.Reference())
+	if err != nil {
+		return nil, fmt.Errorf("could not get package root: %w", err)
 	}
 
 	pkg.Name = oldName
@@ -74,10 +81,32 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 	buffers = map[string]*bytes.Buffer{}
 	for path, code := range files {
 		newPath, _ := filepath.Rel(name, path)
-		if !unneededGoFiles.Has(newPath) {
+		pkgRelPath := strings.TrimPrefix(path, packageRoot+"/")
+
+		if !unneededGoFiles.Has(pkgRelPath) {
 			buffers[newPath] = bytes.NewBuffer(code)
 		}
 	}
 
 	return buffers, err
+}
+
+// Similar to "packageRoot" method from pulumi/pkg/codegen/go/gen.go
+func getPackageRoot(pkg schema.PackageReference) (string, error) {
+	def, err := pkg.Definition()
+	if err != nil {
+		return "", err
+	}
+	var info goGen.GoPackageInfo
+	if goInfo, ok := def.Language["go"].(goGen.GoPackageInfo); ok {
+		info = goInfo
+	}
+	if info.RootPackageName != "" {
+		// package structure is flat
+		return "", nil
+	}
+	if info.ImportBasePath != "" {
+		return path.Base(info.ImportBasePath), nil
+	}
+	return strings.ReplaceAll(pkg.Name(), "-", ""), nil
 }
