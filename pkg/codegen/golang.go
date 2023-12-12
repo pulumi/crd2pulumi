@@ -32,6 +32,10 @@ var unneededGoFiles = codegen.NewStringSet(
 
 	// We use the standard Kubernetes meta/v1 types, so skip generating them:
 	"meta/v1/pulumiTypes.go",
+
+	// No need to generate these, they are imported from pulumi-kubernetes directly:
+	"utilities/pulumiUtilities.go",
+	"utilities/pulumiVersion.go",
 )
 
 func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Buffer, err error) {
@@ -40,6 +44,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 			err = fmt.Errorf("%v", r)
 		}
 	}()
+
 	pkg := pg.SchemaPackageWithObjectMetaType()
 	langName := "go"
 	oldName := pkg.Name
@@ -51,10 +56,11 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 	moduleToPackage["meta/v1"] = "meta/v1"
 
 	jsonData, err := ijson.RawMessage(map[string]any{
-		"importBasePath":  "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes",
-		"moduleToPackage": moduleToPackage,
+		"importBasePath":     "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes",
+		"internalModuleName": "utilities",
+		"moduleToPackage":    moduleToPackage,
 		"packageImportAliases": map[string]any{
-			"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1": "metav1",
+			"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1": "metav1",
 		},
 	})
 	if err != nil {
