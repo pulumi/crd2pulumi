@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.0 (2023-12-12)
+
 - Fix: excluding files from unneededGoFiles was not working (<https://github.com/pulumi/crd2pulumi/pull/120>)
 - Support kubernetes provider v4 (<https://github.com/pulumi/crd2pulumi/pull/119>)
 
