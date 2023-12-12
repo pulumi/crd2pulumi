@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -51,7 +50,7 @@ func UnmarshalSchemas(yamlPath string) (map[string]any, error) {
 }
 
 func UnmarshalTypeSpecJSON(jsonPath string) (map[string]pschema.TypeSpec, error) {
-	jsonFile, err := ioutil.ReadFile(jsonPath)
+	jsonFile, err := os.ReadFile(jsonPath)
 	if err != nil {
 		return nil, fmt.Errorf("could not read file %s: %w", jsonPath, err)
 	}

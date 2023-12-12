@@ -17,7 +17,6 @@ package tests
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,7 +31,7 @@ const gkeManagedCertsUrl = "https://raw.githubusercontent.com/GoogleCloudPlatfor
 
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t *testing.T, path string)) {
-	tmpdir, err := ioutil.TempDir("", "crd2pulumi_test")
+	tmpdir, err := os.MkdirTemp("", "crd2pulumi_test")
 	assert.Nil(t, err, "expected to create a temp dir for the CRD output")
 	t.Cleanup(func() {
 		t.Logf("removing temp dir %q for %s test", tmpdir, lang)
@@ -98,7 +97,7 @@ func TestCRDsWithUnderscore(t *testing.T) {
 		// Ensure inputs are camelCased.
 		filename := filepath.Join(path, "pulumi_crds", "juice", "v1alpha1", "_inputs.py")
 		t.Logf("validating underscored field names in %s", filename)
-		pythonInputs, err := ioutil.ReadFile(filename)
+		pythonInputs, err := os.ReadFile(filename)
 		if err != nil {
 			t.Fatalf("expected to read generated Python code: %s", err)
 		}
@@ -108,7 +107,7 @@ func TestCRDsWithUnderscore(t *testing.T) {
 		// Ensure outputs are camelCased.
 		filename = filepath.Join(path, "pulumi_crds", "juice", "v1alpha1", "outputs.py")
 		t.Logf("validating underscored field names in %s", filename)
-		pythonInputs, err = ioutil.ReadFile(filename)
+		pythonInputs, err = os.ReadFile(filename)
 		if err != nil {
 			t.Fatalf("expected to read generated Python code: %s", err)
 		}

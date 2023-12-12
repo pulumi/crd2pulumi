@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/pulumi/crd2pulumi/pkg/codegen"
@@ -29,7 +28,7 @@ import (
 // Version specifies the crd2pulumi version. It should be set by the linker via LDFLAGS. This defaults to dev
 var Version = "dev"
 
-const long = `crd2pulumi is a CLI tool that generates typed Kubernetes 
+const long = `crd2pulumi is a CLI tool that generates typed Kubernetes
 CustomResources to use in Pulumi programs, based on a
 CustomResourceDefinition YAML schema.`
 
@@ -92,7 +91,7 @@ func Execute() error {
 				}
 				var err error
 				if shouldUseStdin {
-					err = codegen.Generate(cs, []io.ReadCloser{ioutil.NopCloser(bytes.NewBuffer(stdinData))})
+					err = codegen.Generate(cs, []io.ReadCloser{io.NopCloser(bytes.NewBuffer(stdinData))})
 				} else {
 					err = codegen.GenerateFromFiles(cs, args)
 				}
