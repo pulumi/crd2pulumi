@@ -27,7 +27,7 @@ import (
 	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 )
 
-var unneededGoFiles = codegen.NewStringSet(
+var UnneededGoFiles = codegen.NewStringSet(
 	// The root directory doesn't define any resources:
 	"doc.go",
 	"init.go",
@@ -76,7 +76,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
 
-	packageRoot, err := getPackageRoot(pkg.Reference())
+	packageRoot, err := goPackageRoot(pkg.Reference())
 	if err != nil {
 		return nil, fmt.Errorf("could not get package root: %w", err)
 	}
@@ -89,7 +89,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 		newPath, _ := filepath.Rel(name, path)
 		pkgRelPath := strings.TrimPrefix(path, packageRoot+"/")
 
-		if !unneededGoFiles.Has(pkgRelPath) {
+		if !UnneededGoFiles.Has(pkgRelPath) {
 			buffers[newPath] = bytes.NewBuffer(code)
 		}
 	}
@@ -98,7 +98,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 }
 
 // Similar to "packageRoot" method from pulumi/pkg/codegen/go/gen.go
-func getPackageRoot(pkg schema.PackageReference) (string, error) {
+func goPackageRoot(pkg schema.PackageReference) (string, error) {
 	def, err := pkg.Definition()
 	if err != nil {
 		return "", err
