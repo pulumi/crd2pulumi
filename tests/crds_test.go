@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var languages = []string{"dotnet", "go", "nodejs", "python"}
@@ -116,4 +117,51 @@ func TestCRDsWithUnderscore(t *testing.T) {
 	}
 
 	execCrd2Pulumi(t, "python", "crds/underscored-types/networkpolicy.yaml", validateUnderscore)
+}
+
+func TestKubernetesVersionNodeJs(t *testing.T) {
+	validateVersion := func(t *testing.T, path string) {
+		// enter and build the generated package
+		withDir(t, path, func() {
+
+			runRequireNoError(t, exec.Command("npm", "install"))
+			runRequireNoError(t, exec.Command("npm", "run", "build"))
+
+			// extract the version returned by a resource
+			appendFile(t, "bin/index.js", "\nconsole.log((new k8sversion.test.TestResource('test')).__version)")
+
+			version, err := exec.Command("node", "bin/index.js").Output()
+			require.NoError(t, err)
+			assert.Equal(t, "4.5.5\n", string(version))
+		})
+	}
+
+	execCrd2Pulumi(t, "nodejs", "crds/k8sversion/mock_crd.yaml", validateVersion)
+}
+
+func withDir(t *testing.T, dir string, f func()) {
+	pwd, err := os.Getwd()
+	require.NoError(t, err)
+	defer os.Chdir(pwd)
+
+	require.NoError(t, os.Chdir(dir))
+
+	f()
+}
+
+func appendFile(t *testing.T, filename, content string) {
+	// extract the version returned by a resource
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600)
+	require.NoError(t, err)
+	defer f.Close()
+
+	_, err = f.WriteString(content)
+}
+
+func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
+	bytes, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Log(bytes)
+	}
+	require.NoError(t, err)
 }

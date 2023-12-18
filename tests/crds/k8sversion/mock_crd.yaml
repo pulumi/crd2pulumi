@@ -1,0 +1,17 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+spec:
+  group: k8sversion.pulumi.com
+  names:
+    plural: testresources
+    singular: testresource
+    kind: TestResource
+  scope: Namespaced
+  versions:
+    - test:
+      name: test
+      schema:
+        openAPIV3Schema:
+          properties:
+            testProperty:
+              type: string`

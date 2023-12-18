@@ -39,6 +39,9 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	}
 	pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
 		"moduleToPackage": moduleToPackage,
+		"dependencies": map[string]string{
+			"@pulumi/kubernetes": "^4.0.0",
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -58,6 +61,18 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 		return nil, fmt.Errorf("cannot find generated package.json")
 	}
 	files["package.json"] = bytes.ReplaceAll(packageJSON, []byte("${VERSION}"), []byte(""))
+
+	// Pin the kubernetes provider version used
+	utilities, ok := files["utilities.ts"]
+	if !ok {
+		return nil, fmt.Errorf("cannot find generated utilities.ts")
+	}
+	files["utilities.ts"] = bytes.ReplaceAll(utilities,
+		[]byte("export function getVersion(): string {"),
+		[]byte(`export const getVersion: () => string = () => "4.5.5"
+
+function unusedGetVersion(): string {`),
+	)
 
 	// Create a helper `meta/v1.ts` script that exports the ObjectMeta class from the SDK. If there happens to already
 	// be a `meta/v1.ts` file, then just append the script.
