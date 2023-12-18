@@ -15,6 +15,7 @@
 package tests
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -124,8 +125,8 @@ func TestKubernetesVersionNodeJs(t *testing.T) {
 		// enter and build the generated package
 		withDir(t, path, func() {
 
-			require.NoError(t, exec.Command("npm", "i").Run())
-			require.NoError(t, exec.Command("npm", "run", "build").Run())
+			runRequireNoError(t, exec.Command("npm", "install"))
+			runRequireNoError(t, exec.Command("npm", "run", "build"))
 
 			// extract the version returned by a resource
 			appendFile(t, "bin/index.js", "\nconsole.log((new k8sversion.test.TestResource('test')).__version)")
@@ -156,4 +157,15 @@ func appendFile(t *testing.T, filename, content string) {
 	defer f.Close()
 
 	_, err = f.WriteString(content)
+}
+
+func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
+	buf := new(bytes.Buffer)
+	cmd.Stdout = buf
+	cmd.Stderr = buf
+	err := cmd.Run()
+	if err != nil {
+		t.Log(buf)
+	}
+	require.NoError(t, err)
 }
