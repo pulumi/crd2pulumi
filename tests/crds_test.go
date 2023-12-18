@@ -15,7 +15,6 @@
 package tests
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -160,12 +159,9 @@ func appendFile(t *testing.T, filename, content string) {
 }
 
 func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
-	buf := new(bytes.Buffer)
-	cmd.Stdout = buf
-	cmd.Stderr = buf
-	err := cmd.Run()
+	bytes, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Log(buf)
+		t.Log(bytes)
 	}
 	require.NoError(t, err)
 }
