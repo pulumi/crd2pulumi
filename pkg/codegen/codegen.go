@@ -19,6 +19,7 @@ var codeGenFuncs = map[string]GenerateFunc{
 	DotNet: GenerateDotNet,
 	NodeJS: GenerateNodeJS,
 	Python: GeneratePython,
+	Java:   GenerateJava,
 }
 
 // PulumiToolName is a symbol that identifies to Pulumi the name of this program.

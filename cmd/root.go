@@ -46,7 +46,8 @@ func Execute() error {
 	goSettings := &codegen.CodegenSettings{Language: "go"}
 	nodejsSettings := &codegen.CodegenSettings{Language: "nodejs"}
 	pythonSettings := &codegen.CodegenSettings{Language: "python"}
-	allSettings := []*codegen.CodegenSettings{dotNetSettings, goSettings, nodejsSettings, pythonSettings}
+	javaSettings := &codegen.CodegenSettings{Language: "java"}
+	allSettings := []*codegen.CodegenSettings{dotNetSettings, goSettings, nodejsSettings, pythonSettings, javaSettings}
 
 	var force bool
 	var packageVersion string
@@ -119,16 +120,19 @@ func Execute() error {
 	f.StringVarP(&dotNetSettings.PackageName, "dotnetName", "", codegen.DefaultName, "name of generated .NET package")
 	f.StringVarP(&goSettings.PackageName, "goName", "", codegen.DefaultName, "name of generated Go package")
 	f.StringVarP(&nodejsSettings.PackageName, "nodejsName", "", codegen.DefaultName, "name of generated NodeJS package")
-	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python paclkage")
+	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python package")
+	f.StringVarP(&javaSettings.PackageName, "javaName", "", codegen.DefaultName, "name of generated Java package")
 
 	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "", "optional .NET output dir")
 	f.StringVarP(&goSettings.OutputDir, "goPath", "", "", "optional Go output dir")
 	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "", "optional NodeJS output dir")
 	f.StringVarP(&pythonSettings.OutputDir, "pythonPath", "", "", "optional Python output dir")
+	f.StringVarP(&javaSettings.OutputDir, "javaPath", "", "", "optional Java output dir")
 
 	f.BoolVarP(&dotNetSettings.ShouldGenerate, "dotnet", "d", false, "generate .NET")
 	f.BoolVarP(&goSettings.ShouldGenerate, "go", "g", false, "generate Go")
 	f.BoolVarP(&nodejsSettings.ShouldGenerate, "nodejs", "n", false, "generate NodeJS")
 	f.BoolVarP(&pythonSettings.ShouldGenerate, "python", "p", false, "generate Python")
+	f.BoolVarP(&javaSettings.ShouldGenerate, "java", "j", false, "generate Java")
 	return rootCmd.Execute()
 }

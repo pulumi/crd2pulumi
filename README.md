@@ -41,7 +41,7 @@ CustomResources to use in Pulumi programs, based on a
 CustomResourceDefinition YAML schema.
 
 Usage:
-  crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] <crd1.yaml> [crd2.yaml ...] [flags]
+  crd2pulumi [-dgnp] [--nodejsPath path] [--pythonPath path] [--dotnetPath path] [--goPath path] [--javaPath path] <crd1.yaml> [crd2.yaml ...] [flags]
   crd2pulumi [command]
 
 Examples:
@@ -67,6 +67,9 @@ Flags:
       --goName string       name of Go package (default "crds")
       --goPath string       optional Go output dir
   -h, --help                help for crd2pulumi
+  -j, --java                generate Java
+      --javaName string     name of Java package (default "crds")
+      --javaPath string     optional Java output dir
   -n, --nodejs              generate NodeJS
       --nodejsName string   name of NodeJS package (default "crds")
       --nodejsPath string   optional NodeJS output dir
@@ -77,9 +80,9 @@ Flags:
 Use "crd2pulumi [command] --help" for more information about a command.
 ```
 Setting only a language-specific flag will output the generated code in the default directory; so `-d` will output to 
-`crds/dotnet`, `-g` will output to `crds/go`, `-n` will output to `crds/nodejs`, and `-p` will output to `crds/python`. 
-You can also specify a language-specific path (`--pythonPath`, `--nodejsPath`, etc) to control where the code will be 
-outputted, in which case setting `-p`, `-n`, etc becomes unnecessary.
+`crds/dotnet`, `-g` will output to `crds/go`, `-j` will output to `crds/java`, `-n` will output to `crds/nodejs`, and 
+`-p` will output to `crds/python`. You can also specify a language-specific path (`--pythonPath`, `--nodejsPath`, etc) 
+to control where the code will be outputted, in which case setting `-p`, `-n`, etc becomes unnecessary.
 
 ## Examples
 Let's use the example CronTab CRD specified in `resourcedefinition.yaml` from the 
@@ -226,7 +229,40 @@ class MyStack : Stack
 }
 
 ```
+
 > If you get an `Duplicate 'global::System.Runtime.Versioning.TargetFrameworkAttribute' attribute` error when trying to run `pulumi up`, then try deleting the `crontabs/bin` and `crontabs/obj` folders.
+
+### Java
+```bash
+$ crd2pulumi --javaPath ./crontabs resourcedefinition.yaml
+```
+```java
+package com.example;
+
+import com.pulumi.Pulumi;
+
+public class MyStack {
+
+    public static void main(String[] args) {
+        Pulumi.run(ctx -> {
+            // Register a CronTab CRD (Coming Soon - see https://www.pulumi.com/registry/packages/kubernetes/api-docs/yaml/configfile/)
+
+            // Instantiate a CronTab resource.
+            var cronTabInstance = new com.pulumi.crds.stable.v1.CronTab("cronTabInstance",
+                    com.pulumi.crds.stable.v1.CronTabArgs.builder()
+                            .metadata(com.pulumi.kubernetes.meta.v1.inputs.ObjectMetaArgs.builder()
+                                    .name("my-new-cron-object")
+                                    .build())
+                            .spec(com.pulumi.kubernetes.stable.v1.inputs.CronTabSpecArgs.builder()
+                                    .cronSpec("* * * * */5")
+                                    .image("my-awesome-cron-image")
+                                    .build())
+                            .build());
+        });
+    }
+}
+
+```
 
 Now let's run the program and perform the update.
 ```bash

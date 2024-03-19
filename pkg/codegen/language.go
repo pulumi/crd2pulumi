@@ -29,6 +29,7 @@ const DotNet string = "dotnet"
 const Go string = "go"
 const NodeJS string = "nodejs"
 const Python string = "python"
+const Java string = "java"
 
 type CodegenSettings struct {
 	Language       string
