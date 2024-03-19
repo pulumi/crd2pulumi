@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var languages = []string{"dotnet", "go", "nodejs", "python"}
+var languages = []string{"dotnet", "go", "nodejs", "python", "java"}
 
 const gkeManagedCertsUrl = "https://raw.githubusercontent.com/GoogleCloudPlatform/gke-managed-certs/master/deploy/managedcertificates-crd.yaml"
 

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/iancoleman/strcase v0.3.0
+	github.com/pulumi/pulumi-java/pkg v0.9.8
 	github.com/pulumi/pulumi/pkg/v3 v3.95.0
 	github.com/pulumi/pulumi/sdk/v3 v3.95.0
 	github.com/spf13/cobra v1.8.0
