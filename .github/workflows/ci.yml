@@ -1,11 +1,8 @@
 name: ci
 on:
   pull_request:
-    branches:
-      - master
   push:
-    branches:
-      - master
+
 jobs:
   ci:
     runs-on: macos-latest
