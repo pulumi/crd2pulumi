@@ -61,7 +61,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	var err error
 	pkg.Language["csharp"], err = ijson.RawMessage(map[string]any{
 		"packageReferences": map[string]string{
-			"Pulumi.Kubernetes": "3.*",
+			"Pulumi.Kubernetes": "4.*",
 		},
 		"compatibility":          "kubernetes20",
 		"dictionaryConstructors": true,
