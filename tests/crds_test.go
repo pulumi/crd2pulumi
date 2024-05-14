@@ -15,6 +15,7 @@
 package tests
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -22,6 +23,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/pulumi/crd2pulumi/cmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -37,15 +39,16 @@ func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t
 		os.RemoveAll(tmpdir)
 	})
 	langFlag := fmt.Sprintf("--%sPath", lang) // e.g. --dotnetPath
-	binaryPath, err := filepath.Abs("../bin/crd2pulumi")
-	if err != nil {
-		t.Fatalf("unable to create absolute path to binary: %s", err)
-	}
 
-	t.Logf("%s %s=%s %s: running", binaryPath, langFlag, tmpdir, path)
-	crdCmd := exec.Command(binaryPath, langFlag, tmpdir, "--force", path)
-	crdOut, err := crdCmd.CombinedOutput()
-	t.Logf("%s %s=%s %s: output=\n%s", binaryPath, langFlag, tmpdir, path, crdOut)
+	cmd := cmd.New()
+	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+	cmd.SetArgs([]string{langFlag, tmpdir, "--force", path})
+	cmd.SetOut(stdout)
+	cmd.SetErr(stderr)
+
+	t.Logf("crd2pulumi %s=%s %s: running", langFlag, tmpdir, path)
+	err = cmd.Execute()
+	t.Logf("%s=%s %s: output=\n%s", langFlag, tmpdir, path, stdout.String()+stderr.String())
 	if err != nil {
 		t.Fatalf("expected crd2pulumi for '%s=%s %s' to succeed", langFlag, tmpdir, path)
 	}
