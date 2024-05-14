@@ -20,16 +20,16 @@ jobs:
           cache-dependency-path: |
             **/go.sum
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
       - name: Run Go Build
         run: make build
 
       - name: Run tests
         run: make test
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Goreleaser publishing dry run
         uses: goreleaser/goreleaser-action@v3
