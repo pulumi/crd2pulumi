@@ -140,14 +140,15 @@ func AddType(schema map[string]any, name string, types map[string]pschema.Comple
 	propertySpecs := map[string]pschema.PropertySpec{}
 	for propertyName := range properties {
 		// Ignore unnamed properties like "-".
-		if strcase.ToCamel(propertyName) == "" {
+		camelCase := strcase.ToCamel(propertyName)
+		if camelCase == "" {
 			continue
 		}
 		propertySchema, _, _ := unstructured.NestedMap(properties, propertyName)
 		propertyDescription, _, _ := unstructured.NestedString(propertySchema, "description")
 		defaultValue, _, _ := unstructured.NestedFieldNoCopy(propertySchema, "default")
 		propertySpecs[propertyName] = pschema.PropertySpec{
-			TypeSpec:    GetTypeSpec(propertySchema, name+strcase.ToCamel(propertyName), types),
+			TypeSpec:    GetTypeSpec(propertySchema, name+camelCase, types),
 			Description: propertyDescription,
 			Default:     defaultValue,
 		}
