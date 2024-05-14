@@ -1,4 +1,7 @@
 {
+    "-": {
+      "type": "string"
+    },
     "anyType": {
         "$ref": "pulumi.json#/Any"
     },

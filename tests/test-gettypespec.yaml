@@ -23,6 +23,8 @@ object-integer:
   type: object
   additionalProperties:
     type: integer
+"-":
+  type: string
 object-object:
   type: object
   additionalProperties:

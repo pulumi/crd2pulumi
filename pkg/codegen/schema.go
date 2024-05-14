@@ -44,6 +44,7 @@ const anyTypeRef = "pulumi.json#/Any"
 var anyTypeSpec = pschema.TypeSpec{
 	Ref: anyTypeRef,
 }
+
 var arbitraryJSONTypeSpec = pschema.TypeSpec{
 	Type:                 Object,
 	AdditionalProperties: &anyTypeSpec,
@@ -56,8 +57,10 @@ var emptySpec = pschema.ComplexTypeSpec{
 	},
 }
 
-const objectMetaRef = "#/types/kubernetes:meta/v1:ObjectMeta"
-const objectMetaToken = "kubernetes:meta/v1:ObjectMeta"
+const (
+	objectMetaRef   = "#/types/kubernetes:meta/v1:ObjectMeta"
+	objectMetaToken = "kubernetes:meta/v1:ObjectMeta"
+)
 
 // Union type of integer and string
 var intOrStringTypeSpec = pschema.TypeSpec{
@@ -136,6 +139,10 @@ func AddType(schema map[string]any, name string, types map[string]pschema.Comple
 
 	propertySpecs := map[string]pschema.PropertySpec{}
 	for propertyName := range properties {
+		// Ignore unnamed properties like "-".
+		if strcase.ToCamel(propertyName) == "" {
+			continue
+		}
 		propertySchema, _, _ := unstructured.NestedMap(properties, propertyName)
 		propertyDescription, _, _ := unstructured.NestedString(propertySchema, "description")
 		defaultValue, _, _ := unstructured.NestedFieldNoCopy(propertySchema, "default")
@@ -157,7 +164,8 @@ func AddType(schema map[string]any, name string, types map[string]pschema.Comple
 			Properties:  propertySpecs,
 			Required:    required,
 			Description: description,
-		}}
+		},
+	}
 }
 
 // GetTypeSpec returns the corresponding pschema.TypeSpec for a OpenAPI v3

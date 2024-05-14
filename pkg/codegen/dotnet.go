@@ -71,7 +71,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 		return nil, fmt.Errorf("failed to marshal JSON message: %w", err)
 	}
 
-	files, err := dotnet.GeneratePackage(PulumiToolName, pkg, nil)
+	files, err := dotnet.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate .NET package: %w", err)
 	}
