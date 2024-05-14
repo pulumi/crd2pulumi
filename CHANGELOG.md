@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Fix: Pin the Kubernetes version for generated nodejs resources(<https://github.com/pulumi/crd2pulumi/pull/121>)
-- Feat: Add Java generation support (<https://github.com/pulumi/crd2pulumi/pull/129>)
+- Fix unpinned Kubernetes version in generated nodejs resources. [#121](https://github.com/pulumi/crd2pulumi/pull/121)
+- Fix .NET generated code to use provider v4. [#134](https://github.com/pulumi/crd2pulumi/pull/134) 
+- Add Java generation support. [#129](https://github.com/pulumi/crd2pulumi/pull/129)
 
 ## 1.3.0 (2023-12-12)
 
