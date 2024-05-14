@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-- Fix invalid generated code due to unnamed properties. [#135](https://github.com/pulumi/crd2pulumi/pull/135)
 - Fix unpinned Kubernetes version in generated nodejs resources. [#121](https://github.com/pulumi/crd2pulumi/pull/121)
-- Fix a panic when generating code with non-primitive defaults. [#13](https://github.com/pulumi/crd2pulumi/pull/136)
+- Fix .NET generated code to use provider v4. [#134](https://github.com/pulumi/crd2pulumi/pull/134)
+- Fix invalid generated code due to unnamed properties. [#135](https://github.com/pulumi/crd2pulumi/pull/135)
+- Fix a panic when generating code with non-primitive defaults. [#136](https://github.com/pulumi/crd2pulumi/pull/136)
 - Add Java generation support. [#129](https://github.com/pulumi/crd2pulumi/pull/129)
 
 ## 1.3.0 (2023-12-12)
