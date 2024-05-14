@@ -41,7 +41,7 @@ Notice that by just setting a language-specific output path (--pythonPath, --nod
 still get generated, so setting -p, -n, etc becomes unnecessary.
 `
 
-func Execute() error {
+func New() *cobra.Command {
 	dotNetSettings := &codegen.CodegenSettings{Language: "dotnet"}
 	goSettings := &codegen.CodegenSettings{Language: "go"}
 	nodejsSettings := &codegen.CodegenSettings{Language: "nodejs"}
@@ -134,5 +134,5 @@ func Execute() error {
 	f.BoolVarP(&nodejsSettings.ShouldGenerate, "nodejs", "n", false, "generate NodeJS")
 	f.BoolVarP(&pythonSettings.ShouldGenerate, "python", "p", false, "generate Python")
 	f.BoolVarP(&javaSettings.ShouldGenerate, "java", "j", false, "generate Java")
-	return rootCmd.Execute()
+	return rootCmd
 }
