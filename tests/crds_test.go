@@ -90,6 +90,14 @@ func TestCRDsFromUrl(t *testing.T) {
 			name: "VictoriaMetrics",
 			url:  "https://raw.githubusercontent.com/VictoriaMetrics/helm-charts/fdb7dfe/charts/victoria-metrics-operator/crd.yaml",
 		},
+		{
+			name: "GatewayClasses",
+			url:  "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v0.3.0/config/crd/bases/networking.x-k8s.io_gatewayclasses.yaml",
+		},
+		{
+			name: "Contours",
+			url:  "https://raw.githubusercontent.com/projectcontour/contour-operator/f8c07498803d062e30c255976270cbc82cd619b0/config/crd/bases/operator.projectcontour.io_contours.yaml",
+		},
 	}
 
 	for _, tt := range tests {

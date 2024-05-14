@@ -146,9 +146,14 @@ func AddType(schema map[string]any, name string, types map[string]pschema.Comple
 		}
 		propertySchema, _, _ := unstructured.NestedMap(properties, propertyName)
 		propertyDescription, _, _ := unstructured.NestedString(propertySchema, "description")
-		defaultValue, _, _ := unstructured.NestedFieldNoCopy(propertySchema, "default")
+		typeSpec := GetTypeSpec(propertySchema, name+strcase.ToCamel(propertyName), types)
+		// Pulumi's schema doesn't support defaults for objects, so ignore them.
+		var defaultValue any
+		if !(typeSpec.Type == "object" || typeSpec.Type == "array") {
+			defaultValue, _, _ = unstructured.NestedFieldNoCopy(propertySchema, "default")
+		}
 		propertySpecs[propertyName] = pschema.PropertySpec{
-			TypeSpec:    GetTypeSpec(propertySchema, name+camelCase, types),
+			TypeSpec:    typeSpec,
 			Description: propertyDescription,
 			Default:     defaultValue,
 		}
