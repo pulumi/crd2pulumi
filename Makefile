@@ -16,4 +16,4 @@ install::
 	go install -ldflags "-X ${PROJECT}/${VERSION_PATH}=${VERSION}"
 
 test::
-	$(GO) test -v ./tests/
+	$(GO) test -v -coverprofile="coverage.txt" ./...
