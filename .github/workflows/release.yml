@@ -18,10 +18,10 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v1.1.0
         with:
           repo: pulumi/pulumictl
-      - name: Install Go 1.20.x
+      - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.20.x
+          go-version-file: go.mod
           cache-dependency-path: |
             **/go.sum
       - name: Goreleaser publish

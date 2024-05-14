@@ -30,8 +30,6 @@ import (
 
 var languages = []string{"dotnet", "go", "nodejs", "python", "java"}
 
-const gkeManagedCertsUrl = "https://raw.githubusercontent.com/GoogleCloudPlatform/gke-managed-certs/master/deploy/managedcertificates-crd.yaml"
-
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t *testing.T, path string)) {
 	tmpdir, err := os.MkdirTemp("", "crd2pulumi_test")
@@ -80,11 +78,29 @@ func TestCRDsFromFile(t *testing.T) {
 
 // TestCRDsFromUrl pulls the CRD YAML file from a URL and generates it in each language
 func TestCRDsFromUrl(t *testing.T) {
-	for _, lang := range languages {
-		lang := lang
-		t.Run(lang, func(t *testing.T) {
-			t.Parallel()
-			execCrd2Pulumi(t, lang, gkeManagedCertsUrl, nil)
+	tests := []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "GKEManagedCerts",
+			url:  "https://raw.githubusercontent.com/GoogleCloudPlatform/gke-managed-certs/c514101/deploy/managedcertificates-crd.yaml",
+		},
+		{
+			name: "VictoriaMetrics",
+			url:  "https://raw.githubusercontent.com/VictoriaMetrics/helm-charts/fdb7dfe/charts/victoria-metrics-operator/crd.yaml",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, lang := range languages {
+				lang := lang
+				t.Run(lang, func(t *testing.T) {
+					t.Parallel()
+					execCrd2Pulumi(t, lang, tt.url, nil)
+				})
+			}
 		})
 	}
 }
