@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0 (2024-05-29)
+
 - Fix unpinned Kubernetes version in generated nodejs resources. [#121](https://github.com/pulumi/crd2pulumi/pull/121)
 - Fix .NET generated code to use provider v4. [#134](https://github.com/pulumi/crd2pulumi/pull/134)
 - Fix invalid generated code due to unnamed properties. [#135](https://github.com/pulumi/crd2pulumi/pull/135)
