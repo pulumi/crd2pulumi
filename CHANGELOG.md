@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
+- `apiVersion`, `metadata`, and `kind` are now required inputs.
+  (https://github.com/pulumi/crd2pulumi/pulls/141)
+
 ## 1.4.0 (2024-05-29)
 
 - Fix unpinned Kubernetes version in generated nodejs resources. [#121](https://github.com/pulumi/crd2pulumi/pull/121)
