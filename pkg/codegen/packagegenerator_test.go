@@ -56,4 +56,5 @@ func TestReadPackagesFromSource(t *testing.T) {
 	// rollout.Properties["status"]
 	assert.True(t, ok)
 	assert.NotContains(t, rollout.Required, "status")
+	assert.Subset(t, rollout.Language["nodejs"], []byte(`"status"`))
 }

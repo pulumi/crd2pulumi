@@ -15,6 +15,8 @@
 package codegen
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -169,9 +171,27 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
 				}
 				typ.Required = append(typ.Required, "apiVersion", "kind", "metadata")
 
+				propNames := []string{}
+				for name := range typ.Properties {
+					propNames = append(propNames, name)
+				}
+				if typ.Language == nil {
+					typ.Language = make(map[string]pschema.RawMessage)
+				}
+				typ.Language["nodejs"] = rawMessage(map[string][]string{"requiredOutputs": propNames, "requiredInputs": typ.Required})
+
 				types[resourceToken] = typ
 			}
 		}
 	}
 	return types
+}
+
+func rawMessage(v any) pschema.RawMessage {
+	var out bytes.Buffer
+	encoder := json.NewEncoder(&out)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(v)
+	contract.AssertNoErrorf(err, "unexpected error while encoding JSON")
+	return out.Bytes()
 }
