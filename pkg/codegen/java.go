@@ -17,14 +17,15 @@ package codegen
 import (
 	"bytes"
 	"fmt"
+	"regexp"
+
 	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	javaGen "github.com/pulumi/pulumi-java/pkg/codegen/java"
-	"regexp"
 )
 
 func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
-	pkg := pg.SchemaPackageWithObjectMetaType()
+	pkg := pg.SchemaPackage(true)
 
 	// These fields are required for the Java code generation
 	pkg.Description = "Generated Java SDK via crd2pulumi"
@@ -80,7 +81,7 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
     	version = "4.9.0";
 	}`))
 
-	var unneededJavaFiles = []string{
+	unneededJavaFiles := []string{
 		"src/main/java/com/pulumi/" + name + "/Provider.java",
 		"src/main/java/com/pulumi/" + name + "/ProviderArgs.java",
 		"src/main/java/com/pulumi/kubernetes/meta/v1/inputs/ObjectMetaArgs.java",

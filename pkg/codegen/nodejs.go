@@ -22,15 +22,17 @@ import (
 	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
 )
 
-const nodejsName = "nodejs"
-const nodejsMetaPath = "meta/v1.ts"
-const nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
+const (
+	nodejsName     = "nodejs"
+	nodejsMetaPath = "meta/v1.ts"
+	nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
 
 export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
 `
+)
 
 func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
-	pkg := pg.SchemaPackage()
+	pkg := pg.SchemaPackage(false)
 	oldName := pkg.Name
 	pkg.Name = name
 	moduleToPackage, err := pg.ModuleToPackage()

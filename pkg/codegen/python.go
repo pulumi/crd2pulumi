@@ -29,7 +29,7 @@ import pulumi_kubernetes.meta.v1.outputs
 `
 
 func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
-	pkg := pg.SchemaPackageWithObjectMetaType()
+	pkg := pg.SchemaPackage(true)
 
 	langName := "python"
 	oldName := pkg.Name
@@ -64,7 +64,7 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	pythonPackageDir := "pulumi_" + name
 
 	// Remove unneeded files
-	var unneededPythonFiles = []string{
+	unneededPythonFiles := []string{
 		filepath.Join(pythonPackageDir, "README.md"),
 	}
 	for _, unneededFile := range unneededPythonFiles {

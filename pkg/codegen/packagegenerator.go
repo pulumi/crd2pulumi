@@ -38,12 +38,8 @@ type PackageGenerator struct {
 	Types map[string]pschema.ComplexTypeSpec
 	// Version is the semver that will be stamped into the generated package
 	Version string
-	// schemaPackage is the Pulumi schema package used to generate code for
-	// languages that do not need an ObjectMeta type (NodeJS)
+	// schemaPackage is the cached Pulumi schema package used to generate code.
 	schemaPackage *pschema.Package
-	// schemaPackageWithObjectMetaType is the Pulumi schema package used to
-	// generate code for languages that need an ObjectMeta type (Python, Go, and .NET)
-	schemaPackageWithObjectMetaType *pschema.Package
 }
 
 // ReadPackagesFromSource reads one or more documents and returns a PackageGenerator that can be used to generate Pulumi code.
@@ -100,26 +96,15 @@ func ReadPackagesFromSource(version string, yamlSources []io.ReadCloser) (*Packa
 	return pg, nil
 }
 
-// SchemaPackage returns the Pulumi schema package with no ObjectMeta type.
-// This is only necessary for NodeJS and Python.
-func (pg *PackageGenerator) SchemaPackage() *pschema.Package {
+// SchemaPackage returns the Pulumi schema package with
+// an ObjectMeta type. This is only necessary for Go, .NET, Java and Python.
+func (pg *PackageGenerator) SchemaPackage(withObjectMeta bool) *pschema.Package {
 	if pg.schemaPackage == nil {
-		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, false)
+		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, withObjectMeta)
 		contract.AssertNoErrorf(err, "could not parse Pulumi package")
 		pg.schemaPackage = pkg
 	}
 	return pg.schemaPackage
-}
-
-// SchemaPackageWithObjectMetaType returns the Pulumi schema package with
-// an ObjectMeta type. This is only necessary for Go and .NET.
-func (pg *PackageGenerator) SchemaPackageWithObjectMetaType() *pschema.Package {
-	if pg.schemaPackageWithObjectMetaType == nil {
-		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, true)
-		contract.AssertNoErrorf(err, "could not parse Pulumi package")
-		pg.schemaPackageWithObjectMetaType = pkg
-	}
-	return pg.schemaPackageWithObjectMetaType
 }
 
 // Returns language-specific 'ModuleToPackage' map. Creates a mapping from
@@ -164,23 +149,27 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
 				types[resourceToken] = emptySpec
 			}
 			if foundProperties || preserveUnknownFields {
-				types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
+				typ := types[resourceToken]
+				typ.Properties["apiVersion"] = pschema.PropertySpec{
 					TypeSpec: pschema.TypeSpec{
 						Type: String,
 					},
 					Const: crg.Group + "/" + version,
 				}
-				types[resourceToken].Properties["kind"] = pschema.PropertySpec{
+				typ.Properties["kind"] = pschema.PropertySpec{
 					TypeSpec: pschema.TypeSpec{
 						Type: String,
 					},
 					Const: crg.Kind,
 				}
-				types[resourceToken].Properties["metadata"] = pschema.PropertySpec{
+				typ.Properties["metadata"] = pschema.PropertySpec{
 					TypeSpec: pschema.TypeSpec{
 						Ref: objectMetaRef,
 					},
 				}
+				typ.Required = append(typ.Required, "apiVersion", "kind", "metadata")
+
+				types[resourceToken] = typ
 			}
 		}
 	}

@@ -48,7 +48,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 		}
 	}()
 
-	pkg := pg.SchemaPackageWithObjectMetaType()
+	pkg := pg.SchemaPackage(true)
 	langName := "go"
 	oldName := pkg.Name
 	pkg.Name = name

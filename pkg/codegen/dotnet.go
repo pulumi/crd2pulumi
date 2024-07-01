@@ -34,7 +34,7 @@ var unneededDotNetFiles = []string{
 }
 
 func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
-	pkg := pg.SchemaPackageWithObjectMetaType()
+	pkg := pg.SchemaPackage(true)
 
 	// Set up C# namespaces
 	namespaces := map[string]string{}
@@ -61,7 +61,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	var err error
 	pkg.Language["csharp"], err = ijson.RawMessage(map[string]any{
 		"packageReferences": map[string]string{
-			"Pulumi": "3.*",
+			"Pulumi":            "3.*",
 			"Pulumi.Kubernetes": "4.*",
 		},
 		"compatibility":          "kubernetes20",
