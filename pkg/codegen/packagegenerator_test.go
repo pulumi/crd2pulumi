@@ -57,4 +57,8 @@ func TestReadPackagesFromSource(t *testing.T) {
 	assert.True(t, ok)
 	assert.NotContains(t, rollout.Required, "status")
 	assert.Subset(t, rollout.Language["nodejs"], []byte(`"status"`))
+
+	// p-k branch has 32 types, 10 resources
+	pkg := gen.SchemaPackage(true)
+	assert.Equal(t, pkg.Resources, 1)
 }

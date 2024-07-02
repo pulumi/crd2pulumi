@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
 )
 
@@ -35,19 +34,20 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	pkg := pg.SchemaPackage(false)
 	oldName := pkg.Name
 	pkg.Name = name
-	moduleToPackage, err := pg.ModuleToPackage()
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
-		"moduleToPackage": moduleToPackage,
-		"dependencies": map[string]string{
-			"@pulumi/kubernetes": "^4.0.0",
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
+	// moduleToPackage, err := pg.ModuleToPackage()
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%w", err)
+	// }
+	// TODO: moduleToPackage
+	// pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
+	// 	"moduleToPackage": moduleToPackage,
+	// 	"dependencies": map[string]string{
+	// 		"@pulumi/kubernetes": "^4.0.0",
+	// 	},
+	// })
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {

@@ -16,10 +16,10 @@ package codegen
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/python"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 )
@@ -39,16 +39,22 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
-	pkg.Language[langName], err = ijson.RawMessage(map[string]any{
-		"compatibility":       "kubernetes20",
-		"moduleNameOverrides": moduleToPackage,
-		"requires": map[string]string{
-			"pulumi":   "\u003e=3.0.0,\u003c4.0.0",
-			"pyyaml":   "\u003e=5.3",
-			"requests": "\u003e=2.21.0,\u003c2.22.0",
-		},
-		"ignorePyNamePanic": true,
-	})
+
+	fmt.Println("STARTED WITH LAGUAGE")
+	for l, b := range pkg.Language {
+		fmt.Println(l, string(b.(json.RawMessage)))
+	}
+	fmt.Println("moduleNameOverrides", moduleToPackage)
+	// pkg.Language[langName], err = ijson.RawMessage(map[string]any{
+	// 	"compatibility":       "kubernetes20",
+	// 	"moduleNameOverrides": moduleToPackage,
+	// 	"requires": map[string]string{
+	// 		"pulumi":   "\u003e=3.0.0,\u003c4.0.0",
+	// 		"pyyaml":   "\u003e=5.3",
+	// 		"requests": "\u003e=2.21.0,\u003c2.22.0",
+	// 	},
+	// 	"ignorePyNamePanic": true,
+	// })
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
 	}

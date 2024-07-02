@@ -22,9 +22,9 @@ import (
 
 	"github.com/pulumi/crd2pulumi/internal/unstruct"
 	"github.com/pulumi/crd2pulumi/internal/versions"
+	"github.com/pulumi/pulumi-kubernetes/provider/v4/pkg/gen"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // PackageGenerator generates code for multiple CustomResources
@@ -42,6 +42,9 @@ type PackageGenerator struct {
 	Version string
 	// schemaPackage is the cached Pulumi schema package used to generate code.
 	schemaPackage *pschema.Package
+
+	resources map[string]pschema.ResourceSpec
+	language  map[string]pschema.RawMessage
 }
 
 // ReadPackagesFromSource reads one or more documents and returns a PackageGenerator that can be used to generate Pulumi code.
@@ -102,7 +105,7 @@ func ReadPackagesFromSource(version string, yamlSources []io.ReadCloser) (*Packa
 // an ObjectMeta type. This is only necessary for Go, .NET, Java and Python.
 func (pg *PackageGenerator) SchemaPackage(withObjectMeta bool) *pschema.Package {
 	if pg.schemaPackage == nil {
-		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, withObjectMeta)
+		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, pg.language, withObjectMeta)
 		contract.AssertNoErrorf(err, "could not parse Pulumi package")
 		pg.schemaPackage = pkg
 	}
@@ -138,9 +141,52 @@ func (pg *PackageGenerator) HasSchemas() bool {
 }
 
 func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
-	types := map[string]pschema.ComplexTypeSpec{}
+	defs := map[string]any{}
+	definitions := map[string]any{"definitions": defs}
+
 	for _, crg := range pg.CustomResourceGenerators {
-		for version, schema := range crg.Schemas {
+		// schema := map[string]any{"definitions": map[string]any{}}
+		// for _, tok := range crg.ResourceTokens {
+		// 	schema["definitions"][tok] = crg.
+		// }
+
+		for version, spec := range crg.Schemas {
+			token := fmt.Sprintf("%s/%s:%s", crg.Group, version, crg.Kind)
+			defs[token] = spec
+		}
+	}
+
+	pspec := gen.PulumiSchema(definitions)
+
+	for name, t := range pspec.Types {
+		pg.ResourceTokens = append(pg.ResourceTokens, name)
+		gvk := gen.GVKFromRef(name)
+
+		t.Properties["apiVersion"] = pschema.PropertySpec{
+			TypeSpec: pschema.TypeSpec{
+				Type: String,
+			},
+			Const: gvk.Group + "/" + gvk.Version,
+		}
+		t.Properties["kind"] = pschema.PropertySpec{
+			TypeSpec: pschema.TypeSpec{
+				Type: String,
+			},
+			Const: gvk.Kind,
+		}
+		t.Properties["metadata"] = pschema.PropertySpec{
+			TypeSpec: pschema.TypeSpec{
+				Ref: objectMetaRef,
+			},
+		}
+		t.Required = append(t.Required, "apiVersion", "kind", "metadata")
+
+		pspec.Types[name] = t
+	}
+
+	/*
+			fmt.Println(pspec)
+
 			resourceToken := getToken(crg.Group, version, crg.Kind)
 			_, foundProperties, _ := unstructured.NestedMap(schema, "properties")
 			if foundProperties {
@@ -179,12 +225,17 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
 					typ.Language = make(map[string]pschema.RawMessage)
 				}
 				typ.Language["nodejs"] = rawMessage(map[string][]string{"requiredOutputs": propNames, "requiredInputs": typ.Required})
+				typ.Type = "object"
 
 				types[resourceToken] = typ
 			}
 		}
-	}
-	return types
+	*/
+
+	pg.resources = pspec.Resources
+	pg.language = pspec.Language
+
+	return pspec.Types
 }
 
 func rawMessage(v any) pschema.RawMessage {

@@ -77,7 +77,7 @@ var intOrStringTypeSpec = pschema.TypeSpec{
 // Returns the Pulumi package given a types map and a slice of the token types
 // of every CustomResource. If includeObjectMetaType is true, then a
 // ObjectMetaType type is also generated.
-func genPackage(version string, types map[string]pschema.ComplexTypeSpec, resourceTokens []string, includeObjectMetaType bool) (*pschema.Package, error) {
+func genPackage(version string, types map[string]pschema.ComplexTypeSpec, resourceTokens []string, language map[string]pschema.RawMessage, includeObjectMetaType bool) (*pschema.Package, error) {
 	if includeObjectMetaType {
 		types[objectMetaToken] = pschema.ComplexTypeSpec{
 			ObjectTypeSpec: pschema.ObjectTypeSpec{
@@ -109,6 +109,7 @@ func genPackage(version string, types map[string]pschema.ComplexTypeSpec, resour
 		Types:               types,
 		Resources:           resources,
 		AllowedPackageNames: allowedPackages,
+		Language:            language,
 	}
 
 	pkg, err := pschema.ImportSpec(pkgSpec, nil)
