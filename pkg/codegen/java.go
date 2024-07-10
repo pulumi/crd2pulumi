@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"regexp"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	javaGen "github.com/pulumi/pulumi-java/pkg/codegen/java"
 )
@@ -46,21 +45,8 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	}
 	packages["meta/v1"] = "meta.v1"
 
-	langName := "java"
 	oldName := pkg.Name
 	pkg.Name = name
-
-	jsonData, err := ijson.RawMessage(map[string]any{
-		"buildFiles": "gradle",
-		"dependencies": map[string]string{
-			"com.pulumi:kubernetes": "4.9.0",
-		},
-		"packages": packages,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
-	}
-	pkg.Language[langName] = jsonData
 
 	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil)
 	if err != nil {
@@ -68,7 +54,6 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	}
 
 	pkg.Name = oldName
-	delete(pkg.Language, langName)
 
 	// Pin the kubernetes provider version used
 	utilsPath := "src/main/java/com/pulumi/" + name + "/Utilities.java"

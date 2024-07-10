@@ -25,6 +25,8 @@ import (
 	"github.com/pulumi/pulumi-kubernetes/provider/v4/pkg/gen"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // PackageGenerator generates code for multiple CustomResources
@@ -108,6 +110,8 @@ func (pg *PackageGenerator) SchemaPackage(withObjectMeta bool) *pschema.Package 
 		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, pg.language, withObjectMeta)
 		contract.AssertNoErrorf(err, "could not parse Pulumi package")
 		pg.schemaPackage = pkg
+
+		// TODO: dotnet := unstructured.NestedStringMap(pkg.Language, "csharp", "packageReferences")
 	}
 	return pg.schemaPackage
 }
@@ -145,44 +149,58 @@ func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
 	definitions := map[string]any{"definitions": defs}
 
 	for _, crg := range pg.CustomResourceGenerators {
-		// schema := map[string]any{"definitions": map[string]any{}}
-		// for _, tok := range crg.ResourceTokens {
-		// 	schema["definitions"][tok] = crg.
-		// }
-
 		for version, spec := range crg.Schemas {
 			token := fmt.Sprintf("%s/%s:%s", crg.Group, version, crg.Kind)
+			spec["x-kubernetes-group-version-kind"] = []any{map[string]any{
+				"group":   crg.Group,
+				"version": version,
+				"kind":    crg.Kind,
+			}}
+
+			if meta, ok, _ := unstructured.NestedMap(spec, "properties", "metadata"); ok {
+				meta["$ref"] = "#/types/kubernetes:meta/v1:ObjectMeta"
+				delete(meta, "type")
+				unstructured.SetNestedMap(spec, meta, "properties", "metadata")
+			}
+
 			defs[token] = spec
 		}
 	}
 
 	pspec := gen.PulumiSchema(definitions)
 
-	for name, t := range pspec.Types {
-		pg.ResourceTokens = append(pg.ResourceTokens, name)
-		gvk := gen.GVKFromRef(name)
+	pg.ResourceTokens = maps.Keys(pspec.Types)
 
-		t.Properties["apiVersion"] = pschema.PropertySpec{
-			TypeSpec: pschema.TypeSpec{
-				Type: String,
-			},
-			Const: gvk.Group + "/" + gvk.Version,
-		}
-		t.Properties["kind"] = pschema.PropertySpec{
-			TypeSpec: pschema.TypeSpec{
-				Type: String,
-			},
-			Const: gvk.Kind,
-		}
-		t.Properties["metadata"] = pschema.PropertySpec{
-			TypeSpec: pschema.TypeSpec{
-				Ref: objectMetaRef,
-			},
-		}
-		t.Required = append(t.Required, "apiVersion", "kind", "metadata")
+	// for _, r := range pspec.Resources {
+	// 	for _, p := range r.Properties {
+	// 		pspec.Types p.TypeSpec
+	// 	}
+	// }
+	// for name, t := range pspec.Types {
+	// 	pg.ResourceTokens = append(pg.ResourceTokens, name)
+	// gvk := gen.GVKFromRef(name)
 
-		pspec.Types[name] = t
-	}
+	// t.Properties["apiVersion"] = pschema.PropertySpec{
+	// 	TypeSpec: pschema.TypeSpec{
+	// 		Type: String,
+	// 	},
+	// 	Const: gvk.Group + "/" + gvk.Version,
+	// }
+	// t.Properties["kind"] = pschema.PropertySpec{
+	// 	TypeSpec: pschema.TypeSpec{
+	// 		Type: String,
+	// 	},
+	// 	Const: gvk.Kind,
+	// }
+	// t.Properties["metadata"] = pschema.PropertySpec{
+	// 	TypeSpec: pschema.TypeSpec{
+	// 		Ref: objectMetaRef,
+	// 	},
+	// }
+	// t.Required = append(t.Required, "apiVersion", "kind", "metadata")
+
+	// 	pspec.Types[name] = t
+	// }
 
 	/*
 			fmt.Println(pspec)

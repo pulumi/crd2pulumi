@@ -32,30 +32,11 @@ export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
 
 func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage(false)
-	oldName := pkg.Name
-	pkg.Name = name
-	// moduleToPackage, err := pg.ModuleToPackage()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%w", err)
-	// }
-	// TODO: moduleToPackage
-	// pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
-	// 	"moduleToPackage": moduleToPackage,
-	// 	"dependencies": map[string]string{
-	// 		"@pulumi/kubernetes": "^4.0.0",
-	// 	},
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate nodejs package: %w", err)
 	}
-
-	pkg.Name = oldName
-	delete(pkg.Language, nodejsName)
 
 	// Remove ${VERSION} in package.json
 	packageJSON, ok := files["package.json"]

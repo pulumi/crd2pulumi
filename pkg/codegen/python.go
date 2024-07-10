@@ -31,10 +31,6 @@ import pulumi_kubernetes.meta.v1.outputs
 func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage(true)
 
-	langName := "python"
-	oldName := pkg.Name
-	pkg.Name = name
-
 	moduleToPackage, err := pg.ModuleToPackage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
@@ -45,16 +41,6 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 		fmt.Println(l, string(b.(json.RawMessage)))
 	}
 	fmt.Println("moduleNameOverrides", moduleToPackage)
-	// pkg.Language[langName], err = ijson.RawMessage(map[string]any{
-	// 	"compatibility":       "kubernetes20",
-	// 	"moduleNameOverrides": moduleToPackage,
-	// 	"requires": map[string]string{
-	// 		"pulumi":   "\u003e=3.0.0,\u003c4.0.0",
-	// 		"pyyaml":   "\u003e=5.3",
-	// 		"requests": "\u003e=2.21.0,\u003c2.22.0",
-	// 	},
-	// 	"ignorePyNamePanic": true,
-	// })
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
 	}
@@ -63,9 +49,6 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
-
-	pkg.Name = oldName
-	delete(pkg.Language, langName)
 
 	pythonPackageDir := "pulumi_" + name
 
