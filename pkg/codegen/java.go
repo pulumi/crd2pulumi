@@ -17,10 +17,11 @@ package codegen
 import (
 	"bytes"
 	"fmt"
+	"regexp"
+
 	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	javaGen "github.com/pulumi/pulumi-java/pkg/codegen/java"
-	"regexp"
 )
 
 func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
@@ -61,7 +62,7 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	}
 	pkg.Language[langName] = jsonData
 
-	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil)
+	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil, true)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Java package: %w", err)
 	}

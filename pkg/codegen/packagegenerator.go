@@ -22,7 +22,6 @@ import (
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // PackageGenerator generates code for multiple CustomResources
@@ -96,7 +95,6 @@ func ReadPackagesFromSource(version string, yamlSources []io.ReadCloser) (*Packa
 		GroupVersions:            groupVersions,
 		Version:                  version,
 	}
-	pg.Types = pg.GetTypes()
 	return pg, nil
 }
 
@@ -104,7 +102,7 @@ func ReadPackagesFromSource(version string, yamlSources []io.ReadCloser) (*Packa
 // This is only necessary for NodeJS and Python.
 func (pg *PackageGenerator) SchemaPackage() *pschema.Package {
 	if pg.schemaPackage == nil {
-		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, false)
+		pkg, err := genPackage(pg.Version, pg.CustomResourceGenerators, false)
 		contract.AssertNoErrorf(err, "could not parse Pulumi package")
 		pg.schemaPackage = pkg
 	}
@@ -115,7 +113,7 @@ func (pg *PackageGenerator) SchemaPackage() *pschema.Package {
 // an ObjectMeta type. This is only necessary for Go and .NET.
 func (pg *PackageGenerator) SchemaPackageWithObjectMetaType() *pschema.Package {
 	if pg.schemaPackageWithObjectMetaType == nil {
-		pkg, err := genPackage(pg.Version, pg.Types, pg.ResourceTokens, true)
+		pkg, err := genPackage(pg.Version, pg.CustomResourceGenerators, true)
 		contract.AssertNoErrorf(err, "could not parse Pulumi package")
 		pg.schemaPackageWithObjectMetaType = pkg
 	}
@@ -148,41 +146,4 @@ func (pg *PackageGenerator) HasSchemas() bool {
 		}
 	}
 	return false
-}
-
-func (pg *PackageGenerator) GetTypes() map[string]pschema.ComplexTypeSpec {
-	types := map[string]pschema.ComplexTypeSpec{}
-	for _, crg := range pg.CustomResourceGenerators {
-		for version, schema := range crg.Schemas {
-			resourceToken := getToken(crg.Group, version, crg.Kind)
-			_, foundProperties, _ := unstructured.NestedMap(schema, "properties")
-			if foundProperties {
-				AddType(schema, resourceToken, types)
-			}
-			preserveUnknownFields, _, _ := unstructured.NestedBool(schema, "x-kubernetes-preserve-unknown-fields")
-			if preserveUnknownFields {
-				types[resourceToken] = emptySpec
-			}
-			if foundProperties || preserveUnknownFields {
-				types[resourceToken].Properties["apiVersion"] = pschema.PropertySpec{
-					TypeSpec: pschema.TypeSpec{
-						Type: String,
-					},
-					Const: crg.Group + "/" + version,
-				}
-				types[resourceToken].Properties["kind"] = pschema.PropertySpec{
-					TypeSpec: pschema.TypeSpec{
-						Type: String,
-					},
-					Const: crg.Kind,
-				}
-				types[resourceToken].Properties["metadata"] = pschema.PropertySpec{
-					TypeSpec: pschema.TypeSpec{
-						Ref: objectMetaRef,
-					},
-				}
-			}
-		}
-	}
-	return types
 }

@@ -15,20 +15,29 @@
 package codegen
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 	"github.com/pulumi/crd2pulumi/internal/slices"
 	"github.com/pulumi/crd2pulumi/internal/unstruct"
+	"github.com/pulumi/pulumi-kubernetes/provider/v4/pkg/gen"
 	pschema "github.com/pulumi/pulumi/pkg/v3/codegen/schema"
-	"github.com/pulumi/pulumi/sdk/v3/go/common/tokens"
+	"k8s.io/apiextensions-apiserver/pkg/controller/openapi/builder"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/kube-openapi/pkg/validation/spec"
 )
 
 // DefaultName specifies the default value for the package name
 const DefaultName = "crds"
+
+// pulumiKubernetesNameShim is a hack name since upstream schemagen creates types
+// in the `kubernetes` namespace. When binding, we need the package name to be the
+// same namespace as the types.
+const pulumiKubernetesNameShim = "kubernetes"
 
 const (
 	Boolean string = "boolean"
@@ -58,8 +67,9 @@ var emptySpec = pschema.ComplexTypeSpec{
 }
 
 const (
-	objectMetaRef   = "#/types/kubernetes:meta/v1:ObjectMeta"
-	objectMetaToken = "kubernetes:meta/v1:ObjectMeta"
+	objectMetaRef        = "#/types/kubernetes:meta/v1:ObjectMeta"
+	objectMetaToken      = "kubernetes:meta/v1:ObjectMeta"
+	objectMetaPatchToken = "kubernetes:meta/v1:ObjectMetaPatch"
 )
 
 // Union type of integer and string
@@ -74,41 +84,71 @@ var intOrStringTypeSpec = pschema.TypeSpec{
 	},
 }
 
+// mergeSpecs merges a slice of OpenAPI specs into a single OpenAPI spec.
+func mergeSpecs(specs []*spec.Swagger) (*spec.Swagger, error) {
+	if len(specs) == 0 {
+		return nil, errors.New("no OpenAPI specs to merge")
+	}
+
+	mergedSpecs, err := builder.MergeSpecs(specs[0], specs[1:]...)
+	if err != nil {
+		return nil, fmt.Errorf("error merging OpenAPI specs: %w", err)
+	}
+
+	return mergedSpecs, nil
+}
+
 // Returns the Pulumi package given a types map and a slice of the token types
 // of every CustomResource. If includeObjectMetaType is true, then a
 // ObjectMetaType type is also generated.
-func genPackage(version string, types map[string]pschema.ComplexTypeSpec, resourceTokens []string, includeObjectMetaType bool) (*pschema.Package, error) {
-	if includeObjectMetaType {
-		types[objectMetaToken] = pschema.ComplexTypeSpec{
-			ObjectTypeSpec: pschema.ObjectTypeSpec{
-				Type: "object",
-			},
+func genPackage(version string, crgenerators []CustomResourceGenerator, includeObjectMetaType bool) (*pschema.Package, error) {
+	var allCRDSpecs []*spec.Swagger
+	// Merge all OpenAPI specs into a single OpenAPI spec.
+	for _, crg := range crgenerators {
+		for _, spec := range crg.Schemas {
+			allCRDSpecs = append(allCRDSpecs, &spec)
 		}
 	}
 
-	packages := map[string]bool{DefaultName: true, "kubernetes": true}
-	resources := map[string]pschema.ResourceSpec{}
-	for _, baseRef := range resourceTokens {
-		complexTypeSpec := types[baseRef]
-		resources[baseRef] = pschema.ResourceSpec{
-			ObjectTypeSpec:  complexTypeSpec.ObjectTypeSpec,
-			InputProperties: complexTypeSpec.Properties,
+	mergedSpec, err := mergeSpecs(allCRDSpecs)
+	if err != nil {
+		return &pschema.Package{}, fmt.Errorf("could not merge OpenAPI specs: %w", err)
+	}
+
+	marshaledOpenAPISchema, err := json.Marshal(mergedSpec)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling OpenAPI spec: %v", err)
+	}
+
+	unstructuredOpenAPISchema := make(map[string]any)
+	err = json.Unmarshal(marshaledOpenAPISchema, &unstructuredOpenAPISchema)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling OpenAPI spec: %v", err)
+	}
+	// We need to allow hyphens in the property names since Kubernetes CRDs could contain fields that have them and
+	// crd2pulumi should not panic for backwards compatibility.
+	// This will only currently work for Go and Python as they have the correct annotations to serialize/deserialize
+	// the hyphenated fields to their non-hyphenated equivalents.
+	// See: https://github.com/pulumi/crd2pulumi/issues/43
+	pkgSpec := gen.PulumiSchema(unstructuredOpenAPISchema, gen.WithAllowHyphens(true), gen.WithAddPulumiKubernetesDependency("4.18.0"))
+
+	// Populate the package spec with information used in previous versions of crd2pulumi to maintain consistency
+	// with older versions.
+	pkgSpec.Name = pulumiKubernetesNameShim
+	pkgSpec.Version = version
+	pkgSpec.Config = pschema.ConfigSpec{}
+	pkgSpec.Provider = pschema.ResourceSpec{}
+
+	if !includeObjectMetaType {
+		delete(pkgSpec.Types, objectMetaToken)
+		delete(pkgSpec.Types, objectMetaPatchToken)
+	}
+
+	// Remove excess resources generated from the OpenAPI spec.
+	for resourceName := range pkgSpec.Resources {
+		if strings.HasPrefix(resourceName, "kubernetes:meta/v1:") {
+			delete(pkgSpec.Resources, resourceName)
 		}
-		packages[string(tokens.ModuleMember(baseRef).Package())] = true
-	}
-
-	allowedPackages := make([]string, 0, len(packages))
-	for pkg := range packages {
-		allowedPackages = append(allowedPackages, pkg)
-	}
-	sort.Strings(allowedPackages)
-
-	pkgSpec := pschema.PackageSpec{
-		Name:                DefaultName,
-		Version:             version,
-		Types:               types,
-		Resources:           resources,
-		AllowedPackageNames: allowedPackages,
 	}
 
 	pkg, err := pschema.ImportSpec(pkgSpec, nil)
@@ -116,9 +156,7 @@ func genPackage(version string, types map[string]pschema.ComplexTypeSpec, resour
 		return &pschema.Package{}, fmt.Errorf("could not import spec: %w", err)
 	}
 
-	if includeObjectMetaType {
-		delete(types, objectMetaToken)
-	}
+	pkg.Name = DefaultName
 
 	return pkg, nil
 }
