@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen"
 	goGen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
@@ -57,19 +56,6 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 		return nil, fmt.Errorf("%w", err)
 	}
 	moduleToPackage["meta/v1"] = "meta/v1"
-
-	jsonData, err := ijson.RawMessage(map[string]any{
-		"importBasePath":     "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes",
-		"internalModuleName": "utilities",
-		"moduleToPackage":    moduleToPackage,
-		"packageImportAliases": map[string]any{
-			"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1": "metav1",
-		},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal language metadata: %w", err)
-	}
-	pkg.Language[langName] = jsonData
 
 	files, err := goGen.GeneratePackage("crd2pulumi", pkg, nil)
 	if err != nil {
