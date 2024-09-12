@@ -17,13 +17,9 @@ package codegen
 import (
 	"bytes"
 	"fmt"
-	"path"
-	"path/filepath"
-	"strings"
 
 	"github.com/pulumi/pulumi/pkg/v3/codegen"
 	goGen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
-	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 )
 
 var UnneededGoFiles = codegen.NewStringSet(
@@ -62,43 +58,15 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
 
-	packageRoot, err := goPackageRoot(pkg.Reference())
-	if err != nil {
-		return nil, fmt.Errorf("could not get package root: %w", err)
-	}
-
 	pkg.Name = oldName
 	delete(pkg.Language, langName)
 
 	buffers = map[string]*bytes.Buffer{}
 	for path, code := range files {
-		newPath, _ := filepath.Rel(name, path)
-		pkgRelPath := strings.TrimPrefix(path, packageRoot+"/")
-
-		if !UnneededGoFiles.Has(pkgRelPath) {
-			buffers[newPath] = bytes.NewBuffer(code)
+		if !UnneededGoFiles.Has(path) {
+			buffers[path] = bytes.NewBuffer(code)
 		}
 	}
 
 	return buffers, err
-}
-
-// Similar to "packageRoot" method from pulumi/pkg/codegen/go/gen.go
-func goPackageRoot(pkg schema.PackageReference) (string, error) {
-	def, err := pkg.Definition()
-	if err != nil {
-		return "", err
-	}
-	var info goGen.GoPackageInfo
-	if goInfo, ok := def.Language["go"].(goGen.GoPackageInfo); ok {
-		info = goInfo
-	}
-	if info.RootPackageName != "" {
-		// package structure is flat
-		return "", nil
-	}
-	if info.ImportBasePath != "" {
-		return path.Base(info.ImportBasePath), nil
-	}
-	return strings.ReplaceAll(pkg.Name(), "-", ""), nil
 }
