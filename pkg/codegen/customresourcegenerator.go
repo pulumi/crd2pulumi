@@ -56,72 +56,120 @@ type CustomResourceGenerator struct {
 
 // flattenOpenAPI recursively finds all nested objects in the OpenAPI spec and flattens them into a single object as definitions.
 func flattenOpenAPI(sw *spec.Swagger) error {
-	// Create a stack of definition names to be processed.
-	definitionStack := make([]string, 0, len(sw.Definitions))
+	initialDefinitions := make([]string, 0, len(sw.Definitions))
 
-	// Populate existing definitions into the stack.
 	for defName := range sw.Definitions {
-		definitionStack = append(definitionStack, defName)
+		initialDefinitions = append(initialDefinitions, defName)
 	}
 
-	for len(definitionStack) != 0 {
-		// Pop the last definition from the stack.
-		definitionName := definitionStack[len(definitionStack)-1]
-		definitionStack = definitionStack[:len(definitionStack)-1]
-		// Get the definition from the OpenAPI spec.
-		definition := sw.Definitions[definitionName]
+	for _, defName := range initialDefinitions {
+		definition := sw.Definitions[defName]
+		spec, err := flattenRecursively(sw, defName, definition)
+		if err != nil {
+			return fmt.Errorf("error flattening OpenAPI spec: %w", err)
+		}
 
-		for propertyName, propertySchema := range definition.Properties {
-			// If the property is already a reference to a URL, we can skip it.
-			if propertySchema.Ref.GetURL() != nil {
-				continue
-			}
+		sw.Definitions[defName] = spec
+	}
 
-			// If the property is not an object or array, we can skip it.
-			if !propertySchema.Type.Contains("object") {
-				continue
-			}
+	return nil
+}
 
-			if propertySchema.Properties == nil && propertySchema.Items == nil {
-				continue
-			}
+func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schema) (spec.Schema, error) {
+	// If at bottom of the stack, return the spec.
+	if currSpec.Properties == nil && currSpec.Items == nil {
+		return currSpec, nil
+	}
 
-			// If the property is an object with additional properties, we can skip it. We only care about
-			// nested objects that are explicitly defined.
-			if propertySchema.AdditionalProperties != nil {
-				continue
-			}
+	// If the spec already has a reference to a URL, we can skip it.
+	if currSpec.Ref.GetURL() != nil {
+		return currSpec, nil
+	}
 
-			// if propertySchema.Items != nil {
-			// 	currNode := propertySchema.Items.Schema
-			// 	flattenOpenAPIItems(sw, &definitionStack, definitionName, currNode)
-			// 	continue
-			// }
+	// If the property is an object with additional properties, we can skip it. We only care about
+	// nested objects that are explicitly defined.
+	if currSpec.AdditionalProperties != nil {
+		return currSpec, nil
+	}
 
-			// Create a new definition for the nested object by joining the parent definition name and the property name.
-			// This is to ensure that the nested object is unique and does not conflict with other definitions.
-			nestedDefinitionName := definitionName + cgstrings.UppercaseFirst(propertyName)
-			sw.Definitions[nestedDefinitionName] = propertySchema
-			// Add nested object to the stack to be recursively flattened.
-			definitionStack = append(definitionStack, nestedDefinitionName)
+	if currSpec.Items != nil {
+		if currSpec.Items.Schema == nil {
+			return currSpec, fmt.Errorf("error flattening OpenAPI spec: items schema is nil")
+		}
 
-			// Reset the property to be a reference to the nested object.
-			refName := definitionPrefix + nestedDefinitionName
-			ref, err := jsonreference.New(refName)
-			if err != nil {
-				return fmt.Errorf("error creating OpenAPI json reference for nested object: %w", err)
-			}
+		nestedDefinitionName := parentName
 
-			definition.Properties[propertyName] = spec.Schema{
-				SchemaProps: spec.SchemaProps{
-					Ref: spec.Ref{
-						Ref: ref,
-					},
+		s, err := flattenRecursively(sw, nestedDefinitionName, *(currSpec.Items.Schema))
+		if err != nil {
+			return currSpec, fmt.Errorf("error flattening OpenAPI spec: %w", err)
+		}
+
+		currSpec.Items.Schema = &s
+
+		if len(currSpec.Items.Schema.Properties) == 0 {
+			return currSpec, nil
+		}
+
+		sw.Definitions[nestedDefinitionName] = s
+
+		// Reset the property to be a reference to the nested object if the item is an object.
+		refName := definitionPrefix + nestedDefinitionName
+		ref, err := jsonreference.New(refName)
+		if err != nil {
+			return currSpec, fmt.Errorf("error creating OpenAPI json reference for nested object: %w", err)
+		}
+
+		currSpec.Items.Schema.Ref = spec.Ref{Ref: ref}
+		currSpec.Items.Schema.Type = nil
+		currSpec.Items.Schema.Properties = nil
+
+		return currSpec, nil
+	}
+
+	// Recurse through the properties of the object.
+	for nestedPropertyName, nestedProperty := range currSpec.Properties {
+		// Create a new definition for the nested object by joining the parent definition name and the property name.
+		// This is to ensure that the nested object is unique and does not conflict with other definitions.
+		nestedDefinitionName := parentName + sanitizeFieldName(nestedPropertyName)
+
+		s, err := flattenRecursively(sw, nestedDefinitionName, nestedProperty)
+		if err != nil {
+			return currSpec, fmt.Errorf("error flattening OpenAPI spec: %w", err)
+		}
+
+		// The nested property is not an object, so we can skip adding it to the definitions and creating a reference.
+		// We check this here as we want our recursive function to inspect both arrays and objects.
+		if len(nestedProperty.Properties) == 0 {
+			continue
+		}
+
+		sw.Definitions[nestedDefinitionName] = s
+
+		// Reset the property to be a reference to the nested object.
+		refName := definitionPrefix + nestedDefinitionName
+		ref, err := jsonreference.New(refName)
+		if err != nil {
+			return currSpec, fmt.Errorf("error creating OpenAPI json reference for nested object: %w", err)
+		}
+
+		currSpec.Properties[nestedPropertyName] = spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Ref: spec.Ref{
+					Ref: ref,
 				},
-			}
+			},
 		}
 	}
-	return nil
+
+	return currSpec, nil
+}
+
+func sanitizeFieldName(fieldName string) string {
+	if s := strings.ToLower(fieldName); s == "arg" || s == "args" {
+		return "Arguments"
+	}
+
+	return cgstrings.UppercaseFirst(fieldName)
 }
 
 // crdToOpenAPI generates the OpenAPI specs for a given CRD manifest.
