@@ -130,7 +130,7 @@ func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schem
 	for nestedPropertyName, nestedProperty := range currSpec.Properties {
 		// Create a new definition for the nested object by joining the parent definition name and the property name.
 		// This is to ensure that the nested object is unique and does not conflict with other definitions.
-		nestedDefinitionName := parentName + sanitizeFieldName(nestedPropertyName)
+		nestedDefinitionName := parentName + sanitizeReferenceName(nestedPropertyName)
 
 		s, err := flattenRecursively(sw, nestedDefinitionName, nestedProperty)
 		if err != nil {
@@ -164,10 +164,15 @@ func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schem
 	return currSpec, nil
 }
 
-func sanitizeFieldName(fieldName string) string {
+func sanitizeReferenceName(fieldName string) string {
+	// If the field name is "arg" or "args", we need to change it to "Arguments" to avoid conflicts with Go reserved words.
 	if s := strings.ToLower(fieldName); s == "arg" || s == "args" {
 		return "Arguments"
 	}
+
+	//We need to strip out any hyphens and underscores in the reference.
+	fieldName = cgstrings.Unhyphenate(fieldName)
+	fieldName = cgstrings.ModifyStringAroundDelimeter(fieldName, "_", cgstrings.UppercaseFirst)
 
 	return cgstrings.UppercaseFirst(fieldName)
 }
