@@ -31,7 +31,7 @@ jobs:
       - name: Goreleaser publishing dry run
         uses: goreleaser/goreleaser-action@v3
         with:
-          version: latest
-          args: release --rm-dist --skip-publish
+          version: v2.2.0
+          args: release --clean --skip-publish
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}

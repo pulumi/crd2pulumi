@@ -3,7 +3,7 @@ name: release
   push:
     tags:
       - v*.*.*
-      - '!v*.*.*-**'
+      - "!v*.*.*-**"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,8 +28,8 @@ jobs:
         uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
-          version: latest
-          args: release --rm-dist
+          version: v2.2.0
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
       - name: Chocolatey Package Deployment
