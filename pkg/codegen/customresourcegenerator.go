@@ -128,6 +128,11 @@ func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schem
 
 	// Recurse through the properties of the object.
 	for nestedPropertyName, nestedProperty := range currSpec.Properties {
+		// VistoriaMetrics has some weird fields - likely a typegen issue on their end, so let's skip them.
+		if nestedPropertyName == "-" {
+			delete(currSpec.Properties, nestedPropertyName)
+			continue
+		}
 		// Create a new definition for the nested object by joining the parent definition name and the property name.
 		// This is to ensure that the nested object is unique and does not conflict with other definitions.
 		nestedDefinitionName := parentName + sanitizeReferenceName(nestedPropertyName)
@@ -188,7 +193,7 @@ func crdToOpenAPI(crd *extensionv1.CustomResourceDefinition) ([]*spec.Swagger, e
 			continue
 		}
 		// Defaults are not pruned here, but before being served.
-		sw, err := builder.BuildOpenAPIV2(crd, v.Name, builder.Options{V2: true, StripValueValidation: false, StripNullable: false, AllowNonStructural: true})
+		sw, err := builder.BuildOpenAPIV2(crd, v.Name, builder.Options{V2: true, StripValueValidation: true, StripNullable: true, AllowNonStructural: true, IncludeSelectableFields: true})
 		if err != nil {
 			return nil, err
 		}
