@@ -10,6 +10,8 @@ spec:
   scope: Namespaced
   versions:
     - hyphentest2:
+      storage: true
+      served: true
       name: hyphentest2
       schema:
         openAPIV3Schema:

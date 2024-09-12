@@ -158,7 +158,7 @@ func TestKubernetesVersionNodeJs(t *testing.T) {
 
 			version, err := exec.Command("node", "bin/index.js").Output()
 			require.NoError(t, err)
-			assert.Equal(t, "4.5.5\n", string(version))
+			assert.Equal(t, "4.18.0\n", string(version))
 		})
 	}
 
@@ -185,9 +185,10 @@ func appendFile(t *testing.T, filename, content string) {
 }
 
 func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
+	t.Helper()
 	bytes, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Log(bytes)
+		t.Log(string(bytes))
 	}
 	require.NoError(t, err)
 }
