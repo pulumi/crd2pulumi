@@ -21,6 +21,8 @@ spec:
   scope: Namespaced
   versions:
     - test:
+      storage: true
+      served: true
       name: test
       schema:
         openAPIV3Schema:

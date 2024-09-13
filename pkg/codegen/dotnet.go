@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
 	"golang.org/x/text/cases"
@@ -59,18 +58,6 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	oldName := pkg.Name
 	pkg.Name = name
 	var err error
-	pkg.Language["csharp"], err = ijson.RawMessage(map[string]any{
-		"packageReferences": map[string]string{
-			"Pulumi": "3.*",
-			"Pulumi.Kubernetes": "4.*",
-		},
-		"compatibility":          "kubernetes20",
-		"dictionaryConstructors": true,
-		"namespaces":             namespaces,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal JSON message: %w", err)
-	}
 
 	files, err := dotnet.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {

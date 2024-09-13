@@ -11,6 +11,8 @@ spec:
   scope: Namespaced
   versions:
     - name: HyphenTest
+      served: true
+      storage: true
       schema:
         openAPIV3Schema:
           type: object

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 1.5.0 (2024-09-13)
+
+### Added
+- Patch variant resources are now generated for all custom resources. Patch resources allow you to modify and an existing custom resource. For more details on using Patch resources, see our [documentation](https://www.pulumi.com/registry/packages/kubernetes/how-to-guides/managing-resources-with-server-side-apply/#patch-a-resource).
+
+### Changed
+- The Pulumi schema generation now utilizes the library from the Pulumi Kubernetes provider, replacing the previous custom implementation. This resolves a number of correctness issues when generating code. [#143](https://github.com/pulumi/crd2pulumi/pull/143)
+- Golang package generation now correctly adheres to the `--goPath` CLI flag, aligning with the behavior of other languages. [#89](https://github.com/pulumi/crd2pulumi/issues/89)
+- CRDs with oneOf fields are now correctly typed and not generic. [#97](https://github.com/pulumi/crd2pulumi/issues/97)
+- 
+
+### Fixed
+- Various code generation correctness issues have been addressed, including:
+  - Python packages can now be successfully imported and consumed by Pulumi Python programs. [#113](https://github.com/pulumi/crd2pulumi/issues/113)
+  - Golang packages no longer produce compilation errors due to duplicate declarations. [#104](https://github.com/pulumi/crd2pulumi/issues/104)
+  - NodeJS package names are now properly generated. [#70](https://github.com/pulumi/crd2pulumi/issues/70)
+  - Dotnet packages now include the correct imports. [#49](https://github.com/pulumi/crd2pulumi/issues/49)
+  - NodeJS object metadata types no longer accept undefined values. [#34](https://github.com/pulumi/crd2pulumi/issues/34)
+
 ## 1.4.0 (2024-05-29)
 
 - Fix unpinned Kubernetes version in generated nodejs resources. [#121](https://github.com/pulumi/crd2pulumi/pull/121)

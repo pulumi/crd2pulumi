@@ -9,9 +9,11 @@ spec:
   scope: Namespaced
   versions:
     - test:
+      served: true
+      storage: true
       name: test
       schema:
         openAPIV3Schema:
           properties:
             testProperty:
-              type: string`
+              type: string

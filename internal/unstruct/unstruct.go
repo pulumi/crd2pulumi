@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	extensionv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -43,17 +44,17 @@ const CRD = "CustomResourceDefinition"
 // UnmarshalYamls un-marshals the YAML documents in the given file into a slice of unstruct.Unstructureds, one for each
 // CRD. Only returns the YAML files for Kubernetes manifests that are CRDs and ignores others. Returns an error if any
 // document failed to unmarshal.
-func UnmarshalYamls(yamlFiles [][]byte) ([]unstructured.Unstructured, error) {
-	var crds []unstructured.Unstructured
+func UnmarshalYamls(yamlFiles [][]byte) ([]extensionv1.CustomResourceDefinition, error) {
+	var crds []extensionv1.CustomResourceDefinition
 	for _, yamlFile := range yamlFiles {
 		var err error
 		dec := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(yamlFile), 128)
 		for err != io.EOF {
-			var value map[string]any
-			if err = dec.Decode(&value); err != nil && err != io.EOF {
+			var crd extensionv1.CustomResourceDefinition
+			if err = dec.Decode(&crd); err != nil && err != io.EOF {
 				return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
 			}
-			if crd := (unstructured.Unstructured{Object: value}); value != nil && crd.GetKind() == CRD {
+			if crd.Kind == CRD {
 				crds = append(crds, crd)
 			}
 		}

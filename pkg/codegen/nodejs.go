@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 
-	ijson "github.com/pulumi/crd2pulumi/internal/json"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
 )
 
@@ -27,40 +26,21 @@ const nodejsMetaPath = "meta/v1.ts"
 const nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
 
 export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
+export type ObjectMetaPatch = k8s.types.input.meta.v1.ObjectMetaPatch;
 `
 
 func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage()
 	oldName := pkg.Name
 	pkg.Name = name
-	moduleToPackage, err := pg.ModuleToPackage()
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	pkg.Language[nodejsName], err = ijson.RawMessage(map[string]any{
-		"moduleToPackage": moduleToPackage,
-		"dependencies": map[string]string{
-			"@pulumi/kubernetes": "^4.0.0",
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
 
-	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil)
+	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate nodejs package: %w", err)
 	}
 
 	pkg.Name = oldName
 	delete(pkg.Language, nodejsName)
-
-	// Remove ${VERSION} in package.json
-	packageJSON, ok := files["package.json"]
-	if !ok {
-		return nil, fmt.Errorf("cannot find generated package.json")
-	}
-	files["package.json"] = bytes.ReplaceAll(packageJSON, []byte("${VERSION}"), []byte(""))
 
 	// Pin the kubernetes provider version used
 	utilities, ok := files["utilities.ts"]
@@ -69,7 +49,7 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	}
 	files["utilities.ts"] = bytes.ReplaceAll(utilities,
 		[]byte("export function getVersion(): string {"),
-		[]byte(`export const getVersion: () => string = () => "4.5.5"
+		[]byte(`export const getVersion: () => string = () => "4.18.0"
 
 function unusedGetVersion(): string {`),
 	)

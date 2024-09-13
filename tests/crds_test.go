@@ -78,6 +78,36 @@ func TestCRDsFromFile(t *testing.T) {
 
 // TestCRDsFromUrl pulls the CRD YAML file from a URL and generates it in each language
 func TestCRDsFromUrl(t *testing.T) {
+	validateNodeCompiles := func(t *testing.T, path string) {
+		withDir(t, path, func() {
+			runRequireNoError(t, exec.Command("npm", "install"))
+			runRequireNoError(t, exec.Command("npm", "run", "build"))
+		})
+	}
+
+	validateGolangCompiles := func(t *testing.T, path string) {
+		withDir(t, path, func() {
+			runRequireNoError(t, exec.Command("go", "mod", "init", "fakepackage"))
+			runRequireNoError(t, exec.Command("go", "mod", "tidy"))
+			runRequireNoError(t, exec.Command("go", "vet", "./..."))
+		})
+	}
+
+	validateDotnetCompiles := func(t *testing.T, path string) {
+		withDir(t, path, func() {
+			runRequireNoError(t, exec.Command("dotnet", "build"))
+		})
+	}
+
+	// TODO(#145): Also run compilation tests for java and python.
+	compileValidationFn := map[string]func(t *testing.T, path string){
+		"nodejs": validateNodeCompiles,
+		"go":     validateGolangCompiles,
+		"python": nil,
+		"java":   nil,
+		"dotnet": validateDotnetCompiles,
+	}
+
 	tests := []struct {
 		name string
 		url  string
@@ -98,15 +128,61 @@ func TestCRDsFromUrl(t *testing.T) {
 			name: "Contours",
 			url:  "https://raw.githubusercontent.com/projectcontour/contour-operator/f8c07498803d062e30c255976270cbc82cd619b0/config/crd/bases/operator.projectcontour.io_contours.yaml",
 		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/141
+			name: "ElementDeployment",
+			url:  "https://raw.githubusercontent.com/element-hq/ess-starter-edition-core/d7e792bf8a872f06f02f59d807a1c16ee933862b/roles/elementdeployment/files/elementdeployment-schema.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/142
+			name: "Keycloak",
+			url:  "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/25.0.4/kubernetes/keycloaks.k8s.keycloak.org-v1.yml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/115
+			name: "CertManager",
+			url:  "https://gist.githubusercontent.com/RouxAntoine/b7dfb9ce327a4ad40a76ff6552c7fd5e/raw/4b5922da11643e14d04e6b52f7a0fca982e4dace/1-crds.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/104
+			name: "TracingPolicies",
+			url:  "https://raw.githubusercontent.com/cilium/tetragon/v1.2.0/install/kubernetes/tetragon/crds-yaml/cilium.io_tracingpolicies.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/104
+			name: "Argo Rollouts",
+			url:  "https://raw.githubusercontent.com/argoproj/argo-rollouts/74c1a947ab36670ae01a45993a0c5abb44af4677/manifests/crds/rollout-crd.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/92
+			name: "Grafana",
+			url:  "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/grafana-operator/crds/grafanas.integreatly.org.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/70
+			name: "Percona",
+			url:  "https://raw.githubusercontent.com/percona/percona-server-mongodb-operator/main/deploy/crd.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/49
+			name: "Traefik",
+			url:  "https://raw.githubusercontent.com/traefik/traefik/eb99c8c/docs/content/reference/dynamic-configuration/traefik.io_traefikservices.yaml",
+		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/29
+			name: "Istio",
+			url:  "https://raw.githubusercontent.com/istio/istio/c132663/manifests/charts/base/crds/crd-all.gen.yaml",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, lang := range languages {
-				lang := lang
 				t.Run(lang, func(t *testing.T) {
-					t.Parallel()
-					execCrd2Pulumi(t, lang, tt.url, nil)
+					if lang == "dotnet" && (tt.name == "CertManager" || tt.name == "GKEManagedCerts") {
+						t.Skip("Skipping compilation for dotnet. See https://github.com/pulumi/crd2pulumi/issues/17")
+					}
+					execCrd2Pulumi(t, lang, tt.url, compileValidationFn[lang])
 				})
 			}
 		})
@@ -158,7 +234,7 @@ func TestKubernetesVersionNodeJs(t *testing.T) {
 
 			version, err := exec.Command("node", "bin/index.js").Output()
 			require.NoError(t, err)
-			assert.Equal(t, "4.5.5\n", string(version))
+			assert.Equal(t, "4.18.0\n", string(version))
 		})
 	}
 
@@ -185,9 +261,10 @@ func appendFile(t *testing.T, filename, content string) {
 }
 
 func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
+	t.Helper()
 	bytes, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Log(bytes)
+		t.Log(string(bytes))
 	}
 	require.NoError(t, err)
 }
