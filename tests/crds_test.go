@@ -99,7 +99,7 @@ func TestCRDsFromUrl(t *testing.T) {
 		})
 	}
 
-	// TODO: Also run compilation tests for java and python.
+	// TODO(#145): Also run compilation tests for java and python.
 	compileValidationFn := map[string]func(t *testing.T, path string){
 		"nodejs": validateNodeCompiles,
 		"go":     validateGolangCompiles,

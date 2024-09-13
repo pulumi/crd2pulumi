@@ -175,7 +175,7 @@ func sanitizeReferenceName(fieldName string) string {
 		return "Arguments"
 	}
 
-	//We need to strip out any hyphens and underscores in the reference.
+	// We need to strip out any hyphens and underscores in the reference.
 	fieldName = cgstrings.Unhyphenate(fieldName)
 	fieldName = cgstrings.ModifyStringAroundDelimeter(fieldName, "_", cgstrings.UppercaseFirst)
 
@@ -209,7 +209,7 @@ func crdToOpenAPI(crd *extensionv1.CustomResourceDefinition) ([]*spec.Swagger, e
 	return openAPIManifests, nil
 }
 
-// fillDefaultNames sets the default names for the CRD if they are not specified.
+// setCRDDefaults sets the default names for the CRD if they are not specified.
 // This allows the OpenAPI builder to generate the swagger specs correctly with
 // the correct defaults.
 func setCRDDefaults(crd *extensionv1.CustomResourceDefinition) {
