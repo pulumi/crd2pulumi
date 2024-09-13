@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.5.0 (2024-09-13)
+
 ### Added
 - Patch variant resources are now generated for all custom resources. Patch resources allow you to modify and an existing custom resource. For more details on using Patch resources, see our [documentation](https://www.pulumi.com/registry/packages/kubernetes/how-to-guides/managing-resources-with-server-side-apply/#patch-a-resource).
 
