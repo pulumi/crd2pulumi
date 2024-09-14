@@ -181,7 +181,7 @@ func TestCRDsFromUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			for _, lang := range []string{"go"} {
+			for _, lang := range languages {
 				t.Run(lang, func(t *testing.T) {
 					if lang == "dotnet" && (tt.name == "CertManager" || tt.name == "GKEManagedCerts") {
 						t.Skip("Skipping compilation for dotnet. See https://github.com/pulumi/crd2pulumi/issues/17")
