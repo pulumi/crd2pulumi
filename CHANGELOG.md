@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.5.1 (2024-09-13)
+
+- Fixed Patch varaints not generated for types that end in List. [#146](https://github.com/pulumi/crd2pulumi/pull/146)
+
 ## 1.5.0 (2024-09-13)
 
 ### Added
@@ -11,7 +15,7 @@
 - The Pulumi schema generation now utilizes the library from the Pulumi Kubernetes provider, replacing the previous custom implementation. This resolves a number of correctness issues when generating code. [#143](https://github.com/pulumi/crd2pulumi/pull/143)
 - Golang package generation now correctly adheres to the `--goPath` CLI flag, aligning with the behavior of other languages. [#89](https://github.com/pulumi/crd2pulumi/issues/89)
 - CRDs with oneOf fields are now correctly typed and not generic. [#97](https://github.com/pulumi/crd2pulumi/issues/97)
-- 
+
 
 ### Fixed
 - Various code generation correctness issues have been addressed, including:
