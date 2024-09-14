@@ -173,6 +173,10 @@ func TestCRDsFromUrl(t *testing.T) {
 			name: "Istio",
 			url:  "https://raw.githubusercontent.com/istio/istio/c132663/manifests/charts/base/crds/crd-all.gen.yaml",
 		},
+		{
+			name: "Argo Application Set",
+			url:  "https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/crds/applicationset-crd.yaml",
+		},
 	}
 
 	for _, tt := range tests {
