@@ -8,7 +8,7 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-java/pkg v0.14.0
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20240913215025-7155e2ed5604
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20240916231657-74673fdf488b
 	github.com/pulumi/pulumi/pkg/v3 v3.130.0
 	github.com/pulumi/pulumi/sdk/v3 v3.130.0
 	github.com/spf13/cobra v1.8.1
@@ -260,5 +260,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/pulumi/pulumi-kubernetes/provider/v4 => github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20240914001316-08cb0541a657

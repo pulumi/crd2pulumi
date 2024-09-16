@@ -130,7 +130,7 @@ func genPackage(version string, crgenerators []CustomResourceGenerator, includeO
 	// This will only currently work for Go and Python as they have the correct annotations to serialize/deserialize
 	// the hyphenated fields to their non-hyphenated equivalents.
 	// See: https://github.com/pulumi/crd2pulumi/issues/43
-	pkgSpec := gen.PulumiSchema(unstructuredOpenAPISchema, gen.WithAllowHyphens(true), gen.WithAddPulumiKubernetesDependency("4.18.0"))
+	pkgSpec := gen.PulumiSchema(unstructuredOpenAPISchema, gen.WithAllowHyphens(true), gen.WithPulumiKubernetesDependency("4.18.0"))
 
 	// Populate the package spec with information used in previous versions of crd2pulumi to maintain consistency
 	// with older versions.
