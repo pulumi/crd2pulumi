@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.5.2 (2024-09-16)
+
+- Set the pulumi-kubernetes dependency for Python packages to v4.18.0. [#148](https://github.com/pulumi/crd2pulumi/issues/148)
+- Fixed generating Go types for StringMapArrayMap types. [#147](https://github.com/pulumi/crd2pulumi/issues/147)
+
 ## 1.5.1 (2024-09-13)
 
 - Fixed Patch varaints not generated for types that end in List. [#146](https://github.com/pulumi/crd2pulumi/pull/146)
