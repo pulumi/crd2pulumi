@@ -177,6 +177,11 @@ func TestCRDsFromUrl(t *testing.T) {
 			name: "Argo Application Set",
 			url:  "https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/crds/applicationset-crd.yaml",
 		},
+		{
+			// https://github.com/pulumi/crd2pulumi/issues/147
+			name: "Prometheus Operator",
+			url:  "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.76.2/bundle.yaml",
+		},
 	}
 
 	for _, tt := range tests {
