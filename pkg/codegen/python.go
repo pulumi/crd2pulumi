@@ -62,6 +62,9 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 
 	buffers := map[string]*bytes.Buffer{}
 	for name, code := range files {
+		if name == "pyproject.toml" {
+			code = bytes.ReplaceAll(code, []byte(`0.0.0+dev`), []byte(KubernetesProviderVersion))
+		}
 		buffers[name] = bytes.NewBuffer(code)
 	}
 	return buffers, nil

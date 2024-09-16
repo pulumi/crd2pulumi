@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/pulumi/crd2pulumi/cmd"
+	"github.com/pulumi/crd2pulumi/pkg/codegen"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -243,7 +244,7 @@ func TestKubernetesVersionNodeJs(t *testing.T) {
 
 			version, err := exec.Command("node", "bin/index.js").Output()
 			require.NoError(t, err)
-			assert.Equal(t, "4.18.0\n", string(version))
+			assert.Equal(t, codegen.KubernetesProviderVersion+"\n", string(version))
 		})
 	}
 
