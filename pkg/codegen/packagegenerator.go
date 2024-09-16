@@ -24,6 +24,10 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/contract"
 )
 
+const (
+	KubernetesProviderVersion string = "4.18.0"
+)
+
 // PackageGenerator generates code for multiple CustomResources
 type PackageGenerator struct {
 	// CustomResourceGenerators contains a slice of all CustomResourceGenerators

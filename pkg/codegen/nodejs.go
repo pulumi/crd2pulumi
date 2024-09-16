@@ -49,10 +49,9 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	}
 	files["utilities.ts"] = bytes.ReplaceAll(utilities,
 		[]byte("export function getVersion(): string {"),
-		[]byte(`export const getVersion: () => string = () => "4.18.0"
+		[]byte(fmt.Sprintf(`export const getVersion: () => string = () => "%s"
 
-function unusedGetVersion(): string {`),
-	)
+function unusedGetVersion(): string {`, KubernetesProviderVersion)))
 
 	// Create a helper `meta/v1.ts` script that exports the ObjectMeta class from the SDK. If there happens to already
 	// be a `meta/v1.ts` file, then just append the script.
