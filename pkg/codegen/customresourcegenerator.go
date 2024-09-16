@@ -77,7 +77,7 @@ func flattenOpenAPI(sw *spec.Swagger) error {
 
 func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schema) (spec.Schema, error) {
 	// If at bottom of the stack, return the spec.
-	if currSpec.Properties == nil && currSpec.Items == nil {
+	if currSpec.Properties == nil && currSpec.Items == nil && currSpec.AdditionalProperties == nil {
 		return currSpec, nil
 	}
 
@@ -86,42 +86,49 @@ func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schem
 		return currSpec, nil
 	}
 
-	// If the property is an object with additional properties, we can skip it. We only care about
+	// If the property is an object with additional properties, we can skip it if it is not an array of inline objects. We only care about
 	// nested objects that are explicitly defined.
 	if currSpec.AdditionalProperties != nil {
+		// Not an array of inline objects, so we can skip processing.
+		if currSpec.AdditionalProperties.Schema.Items == nil {
+			return currSpec, nil
+		}
+
+		// Property is an array of inline objects.
+		s, ref, err := flattedArrayObject(parentName, sw, currSpec.AdditionalProperties.Schema.Items.Schema)
+		if err != nil {
+			return currSpec, fmt.Errorf("error flattening OpenAPI object of array property: %w", err)
+		}
+
+		currSpec.AdditionalProperties.Schema.Items.Schema = &s
+
+		if ref != nil {
+			currSpec.AdditionalProperties.Schema.Items.Schema.Ref = spec.Ref{Ref: *ref}
+			currSpec.AdditionalProperties.Schema.Items.Schema.Type = nil
+			currSpec.AdditionalProperties.Schema.Items.Schema.Properties = nil
+		}
+
 		return currSpec, nil
 	}
 
+	// If the property is an array, we need to remove any inline objects and replace them with references.
 	if currSpec.Items != nil {
 		if currSpec.Items.Schema == nil {
 			return currSpec, fmt.Errorf("error flattening OpenAPI spec: items schema is nil")
 		}
 
-		nestedDefinitionName := parentName
-
-		s, err := flattenRecursively(sw, nestedDefinitionName, *(currSpec.Items.Schema))
+		s, ref, err := flattedArrayObject(parentName, sw, currSpec.Items.Schema)
 		if err != nil {
-			return currSpec, fmt.Errorf("error flattening OpenAPI spec: %w", err)
+			return currSpec, fmt.Errorf("error flattening OpenAPI array property: %w", err)
 		}
 
 		currSpec.Items.Schema = &s
 
-		if len(currSpec.Items.Schema.Properties) == 0 {
-			return currSpec, nil
+		if ref != nil {
+			currSpec.Items.Schema.Ref = spec.Ref{Ref: *ref}
+			currSpec.Items.Schema.Type = nil
+			currSpec.Items.Schema.Properties = nil
 		}
-
-		sw.Definitions[nestedDefinitionName] = s
-
-		// Reset the property to be a reference to the nested object if the item is an object.
-		refName := definitionPrefix + nestedDefinitionName
-		ref, err := jsonreference.New(refName)
-		if err != nil {
-			return currSpec, fmt.Errorf("error creating OpenAPI json reference for nested object: %w", err)
-		}
-
-		currSpec.Items.Schema.Ref = spec.Ref{Ref: ref}
-		currSpec.Items.Schema.Type = nil
-		currSpec.Items.Schema.Properties = nil
 
 		return currSpec, nil
 	}
@@ -167,6 +174,30 @@ func flattenRecursively(sw *spec.Swagger, parentName string, currSpec spec.Schem
 	}
 
 	return currSpec, nil
+}
+
+// flattedArrayObject flattens an OpenAPI array property.
+func flattedArrayObject(parentName string, sw *spec.Swagger, itemsSchema *spec.Schema) (spec.Schema, *jsonreference.Ref, error) {
+	nestedDefinitionName := parentName
+
+	s, err := flattenRecursively(sw, nestedDefinitionName, *itemsSchema)
+	if err != nil {
+		return s, nil, fmt.Errorf("error flattening OpenAPI spec: %w", err)
+	}
+
+	if len(s.Properties) == 0 {
+		return s, nil, nil
+	}
+
+	sw.Definitions[nestedDefinitionName] = s
+
+	refName := definitionPrefix + nestedDefinitionName
+	ref, err := jsonreference.New(refName)
+	if err != nil {
+		return s, nil, fmt.Errorf("error creating OpenAPI json reference for nested object: %w", err)
+	}
+
+	return s, &ref, nil
 }
 
 func sanitizeReferenceName(fieldName string) string {
