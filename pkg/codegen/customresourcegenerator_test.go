@@ -204,28 +204,29 @@ func TestNewCustomResourceGenerator(t *testing.T) {
 				t.Errorf("NewCustomResourceGenerator() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !tt.wantErr {
-				if got.APIVersion != tt.expected.APIVersion {
-					t.Errorf("expected APIVersion %s, got %s", tt.expected.APIVersion, got.APIVersion)
-				}
-				if got.Kind != tt.expected.Kind {
-					t.Errorf("expected Kind %s, got %s", tt.expected.Kind, got.Kind)
-				}
-				if got.Plural != tt.expected.Plural {
-					t.Errorf("expected Plural %s, got %s", tt.expected.Plural, got.Plural)
-				}
-				if got.Group != tt.expected.Group {
-					t.Errorf("expected Group %s, got %s", tt.expected.Group, got.Group)
-				}
-				if len(got.Versions) != len(tt.expected.Versions) {
-					t.Errorf("expected Versions %v, got %v", tt.expected.Versions, got.Versions)
-				}
-				if len(got.GroupVersions) != len(tt.expected.GroupVersions) {
-					t.Errorf("expected GroupVersions %v, got %v", tt.expected.GroupVersions, got.GroupVersions)
-				}
-				if len(got.ResourceTokens) != len(tt.expected.ResourceTokens) {
-					t.Errorf("expected ResourceTokens %v, got %v", tt.expected.ResourceTokens, got.ResourceTokens)
-				}
+			if tt.wantErr != false {
+				return
+			}
+			if got.APIVersion != tt.expected.APIVersion {
+				t.Errorf("expected APIVersion %s, got %s", tt.expected.APIVersion, got.APIVersion)
+			}
+			if got.Kind != tt.expected.Kind {
+				t.Errorf("expected Kind %s, got %s", tt.expected.Kind, got.Kind)
+			}
+			if got.Plural != tt.expected.Plural {
+				t.Errorf("expected Plural %s, got %s", tt.expected.Plural, got.Plural)
+			}
+			if got.Group != tt.expected.Group {
+				t.Errorf("expected Group %s, got %s", tt.expected.Group, got.Group)
+			}
+			if len(got.Versions) != len(tt.expected.Versions) {
+				t.Errorf("expected Versions %v, got %v", tt.expected.Versions, got.Versions)
+			}
+			if len(got.GroupVersions) != len(tt.expected.GroupVersions) {
+				t.Errorf("expected GroupVersions %v, got %v", tt.expected.GroupVersions, got.GroupVersions)
+			}
+			if len(got.ResourceTokens) != len(tt.expected.ResourceTokens) {
+				t.Errorf("expected ResourceTokens %v, got %v", tt.expected.ResourceTokens, got.ResourceTokens)
 			}
 		})
 	}
