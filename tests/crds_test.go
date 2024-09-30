@@ -189,9 +189,17 @@ func TestCRDsFromUrl(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, lang := range languages {
 				t.Run(lang, func(t *testing.T) {
-					if lang == "dotnet" && (tt.name == "CertManager" || tt.name == "GKEManagedCerts") {
-						t.Skip("Skipping compilation for dotnet. See https://github.com/pulumi/crd2pulumi/issues/17")
+					if lang == "dotnet" {
+						if tt.name == "CertManager" || tt.name == "GKEManagedCerts" {
+							t.Skip("Skipping compilation for dotnet. See https://github.com/pulumi/crd2pulumi/issues/17")
+						}
+
+						if tt.name == "Percona" {
+							t.Skip("Skipping dotnet compilation for Percona as we generate invalid code with hyphens that are not allowed in C# identifiers.")
+						}
+
 					}
+
 					execCrd2Pulumi(t, lang, tt.url, compileValidationFn[lang])
 				})
 			}
