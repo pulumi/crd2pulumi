@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.5.3 (2024-09-30)
+
+- Fix crd2pulumi not generating all CRD versions. [#152](https://github.com/pulumi/crd2pulumi/issues/152)
+- Fix crd2pulumi generating packages and types with incorrect group names. [#152](https://github.com/pulumi/crd2pulumi/issues/152)
+
 ## 1.5.2 (2024-09-16)
 
 - Set the pulumi-kubernetes dependency for Python packages to v4.18.0. [#148](https://github.com/pulumi/crd2pulumi/issues/148)
