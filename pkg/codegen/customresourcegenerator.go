@@ -214,15 +214,12 @@ func sanitizeReferenceName(fieldName string) string {
 }
 
 // crdToOpenAPI generates the OpenAPI specs for a given CRD manifest.
-func crdToOpenAPI(crd *extensionv1.CustomResourceDefinition) ([]*spec.Swagger, error) {
-	var openAPIManifests []*spec.Swagger
+func crdToOpenAPI(crd *extensionv1.CustomResourceDefinition) (map[string]*spec.Swagger, error) {
+	openAPIManifests := make(map[string]*spec.Swagger)
 
 	setCRDDefaults(crd)
 
 	for _, v := range crd.Spec.Versions {
-		if !v.Served {
-			continue
-		}
 		// Defaults are not pruned here, but before being served.
 		sw, err := builder.BuildOpenAPIV2(crd, v.Name, builder.Options{V2: true, StripValueValidation: true, StripNullable: true, AllowNonStructural: true, IncludeSelectableFields: true})
 		if err != nil {
@@ -234,7 +231,7 @@ func crdToOpenAPI(crd *extensionv1.CustomResourceDefinition) ([]*spec.Swagger, e
 			return nil, fmt.Errorf("error flattening OpenAPI spec: %w", err)
 		}
 
-		openAPIManifests = append(openAPIManifests, sw)
+		openAPIManifests[v.Name] = sw
 	}
 
 	return openAPIManifests, nil
@@ -261,8 +258,8 @@ func NewCustomResourceGenerator(crd extensionv1.CustomResourceDefinition) (Custo
 		return CustomResourceGenerator{}, fmt.Errorf("could not generate OpenAPI spec for CRD: %w", err)
 	}
 
-	for _, sw := range swagger {
-		schemas[sw.Info.Version] = *sw
+	for version, sw := range swagger {
+		schemas[version] = *sw
 	}
 
 	kind := crd.Spec.Names.Kind
