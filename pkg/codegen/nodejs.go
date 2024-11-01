@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 )
 
 const nodejsName = "nodejs"
@@ -26,13 +27,34 @@ const nodejsMetaPath = "meta/v1.ts"
 const nodejsMetaFile = `import * as k8s from "@pulumi/kubernetes";
 
 export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
+export type ObjectMetaOutput = k8s.types.output.meta.v1.ObjectMeta;
 export type ObjectMetaPatch = k8s.types.input.meta.v1.ObjectMetaPatch;
+export type ObjectMetaPatchOutput = k8s.types.output.meta.v1.ObjectMetaPatch;
 `
 
 func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackage()
 	oldName := pkg.Name
 	pkg.Name = name
+
+	// Suffix non-input `metadata` properties with `Output` so that the correct
+	// type is used.
+
+	for _, r := range pkg.Resources {
+		for _, p := range r.Properties {
+			if p.Name == "metadata" {
+				if t, ok := p.Type.(*schema.TokenType); ok {
+					if t.Token == objectMetaToken ||
+						t.Token == objectMetaPatchToken {
+						p.Type = &schema.TokenType{
+							Token:          t.Token + "Output",
+							UnderlyingType: t.UnderlyingType,
+						}
+					}
+				}
+			}
+		}
+	}
 
 	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true)
 	if err != nil {
