@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix crd2pulumi using ObjectMeta input type on generated NodeJS metadata field. [#157](https://github.com/pulumi/crd2pulumi/pull/157)
+
 ## 1.5.3 (2024-09-30)
 
 - Fix crd2pulumi not generating all CRD versions. [#152](https://github.com/pulumi/crd2pulumi/issues/152)
