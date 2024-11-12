@@ -286,3 +286,26 @@ func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
 	}
 	require.NoError(t, err)
 }
+
+func TestNodeJsObjectMeta(t *testing.T) {
+	validateVersion := func(t *testing.T, path string) {
+		// enter and build the generated package
+		withDir(t, path, func() {
+			runRequireNoError(t, exec.Command("npm", "install"))
+			runRequireNoError(t, exec.Command("npm", "run", "build"))
+
+			filename := filepath.Join(path, "k8sversion", "test", "testResource.ts")
+			t.Logf("validating objectmeta type in %s", filename)
+
+			testResource, err := os.ReadFile(filename)
+			if err != nil {
+				t.Fatalf("expected to read generated NodeJS code: %s", err)
+			}
+
+			assert.Contains(t, string(testResource), "pulumi.Output<outputs.meta.v1.ObjectMeta>;", "expected metadata output type")
+			assert.Contains(t, string(testResource), "metadata?: pulumi.Input<inputs.meta.v1.ObjectMeta>;", "expected metadata input type")
+		})
+	}
+
+	execCrd2Pulumi(t, "nodejs", "crds/k8sversion/mock_crd.yaml", validateVersion)
+}

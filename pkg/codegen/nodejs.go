@@ -30,7 +30,7 @@ export type ObjectMetaPatch = k8s.types.input.meta.v1.ObjectMetaPatch;
 `
 
 func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
-	pkg := pg.SchemaPackage()
+	pkg := pg.SchemaPackageWithObjectMetaType()
 	oldName := pkg.Name
 	pkg.Name = name
 

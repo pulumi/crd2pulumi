@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- NodeJS no longer uses a custom object metadata type for inputs and outputs. (https://github.com/pulumi/crd2pulumi/issues/158)
+
 ## 1.5.3 (2024-09-30)
 
 - Fix crd2pulumi not generating all CRD versions. [#152](https://github.com/pulumi/crd2pulumi/issues/152)
