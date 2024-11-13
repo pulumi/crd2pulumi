@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## Unreleased
+## 1.5.4 (2024-11-13)
 
-- NodeJS no longer uses a custom object metadata type for inputs and outputs. (https://github.com/pulumi/crd2pulumi/issues/158)
+- NodeJS now uses correct input/output types for object metadata. (https://github.com/pulumi/crd2pulumi/issues/158)
 
 ## 1.5.3 (2024-09-30)
 
