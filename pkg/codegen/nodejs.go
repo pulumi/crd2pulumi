@@ -34,7 +34,7 @@ func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	oldName := pkg.Name
 	pkg.Name = name
 
-	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true)
+	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate nodejs package: %w", err)
 	}

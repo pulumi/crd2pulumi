@@ -4,7 +4,7 @@ spec:
   group: hyphentest2.pulumi.com
   names:
     kind: HyphenTest2
-    listKind: hyphentest2
+    listKind: HyphenTest2List
     plural: hyphentest2s
     singular: hyphentest2
   scope: Namespaced
