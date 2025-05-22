@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	KubernetesProviderVersion string = "4.18.0"
+	KubernetesProviderVersion string = "4.23.0"
 )
 
 // PackageGenerator generates code for multiple CustomResources

@@ -4,15 +4,14 @@ spec:
   group: hyphentest2.pulumi.com
   names:
     kind: HyphenTest2
-    listKind: hyphentest2
+    listKind: hyphentest2list
     plural: hyphentest2s
     singular: hyphentest2
   scope: Namespaced
   versions:
-    - hyphentest2:
+    - name: v1
       storage: true
       served: true
-      name: hyphentest2
       schema:
         openAPIV3Schema:
           properties:

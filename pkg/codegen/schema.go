@@ -151,7 +151,7 @@ func genPackage(version string, crgenerators []CustomResourceGenerator, includeO
 		}
 	}
 
-	pkg, err := pschema.ImportSpec(pkgSpec, nil)
+	pkg, err := pschema.ImportSpec(pkgSpec, nil, pschema.ValidationOptions{})
 	if err != nil {
 		return &pschema.Package{}, fmt.Errorf("could not import spec: %w", err)
 	}

@@ -33,12 +33,7 @@ var languages = []string{"dotnet", "go", "nodejs", "python", "java"}
 
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t *testing.T, path string)) {
-	tmpdir, err := os.MkdirTemp("", "crd2pulumi_test")
-	assert.Nil(t, err, "expected to create a temp dir for the CRD output")
-	t.Cleanup(func() {
-		t.Logf("removing temp dir %q for %s test", tmpdir, lang)
-		os.RemoveAll(tmpdir)
-	})
+	tmpdir := t.TempDir()
 	langFlag := fmt.Sprintf("--%sPath", lang) // e.g. --dotnetPath
 
 	cmd := cmd.New()
@@ -48,7 +43,7 @@ func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t
 	cmd.SetErr(stderr)
 
 	t.Logf("crd2pulumi %s=%s %s: running", langFlag, tmpdir, path)
-	err = cmd.Execute()
+	err := cmd.Execute()
 	t.Logf("%s=%s %s: output=\n%s", langFlag, tmpdir, path, stdout.String()+stderr.String())
 	if err != nil {
 		t.Fatalf("expected crd2pulumi for '%s=%s %s' to succeed", langFlag, tmpdir, path)
@@ -157,7 +152,7 @@ func TestCRDsFromUrl(t *testing.T) {
 		{
 			// https://github.com/pulumi/crd2pulumi/issues/92
 			name: "Grafana",
-			url:  "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/grafana-operator/crds/grafanas.integreatly.org.yaml",
+			url:  "https://raw.githubusercontent.com/bitnami/charts/refs/tags/grafana-operator/4.9.0/bitnami/grafana-operator/crds/grafanas.integreatly.org.yaml",
 		},
 		{
 			// https://github.com/pulumi/crd2pulumi/issues/70
@@ -299,6 +294,7 @@ func appendFile(t *testing.T, filename, content string) {
 	defer f.Close()
 
 	_, err = f.WriteString(content)
+	require.NoError(t, err)
 }
 
 func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
