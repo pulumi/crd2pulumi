@@ -152,7 +152,7 @@ func TestCRDsFromUrl(t *testing.T) {
 		{
 			// https://github.com/pulumi/crd2pulumi/issues/92
 			name: "Grafana",
-			url:  "https://raw.githubusercontent.com/bitnami/charts/main/bitnami/grafana-operator/crds/grafanas.integreatly.org.yaml",
+			url:  "https://raw.githubusercontent.com/bitnami/charts/refs/tags/grafana-operator/4.9.0/bitnami/grafana-operator/crds/grafanas.integreatly.org.yaml",
 		},
 		{
 			// https://github.com/pulumi/crd2pulumi/issues/70
@@ -294,6 +294,7 @@ func appendFile(t *testing.T, filename, content string) {
 	defer f.Close()
 
 	_, err = f.WriteString(content)
+	require.NoError(t, err)
 }
 
 func runRequireNoError(t *testing.T, cmd *exec.Cmd) {
