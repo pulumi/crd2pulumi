@@ -49,7 +49,7 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	oldName := pkg.Name
 	pkg.Name = name
 
-	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil, true)
+	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil, nil, true, false)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Java package: %w", err)
 	}

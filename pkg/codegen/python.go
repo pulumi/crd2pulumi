@@ -34,7 +34,7 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	oldName := pkg.Name
 	pkg.Name = name
 
-	files, err := python.GeneratePackage(PulumiToolName, pkg, nil)
+	files, err := python.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("could not generate Go package: %w", err)
 	}
