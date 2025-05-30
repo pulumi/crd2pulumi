@@ -9,8 +9,8 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-java/pkg v1.12.0
 	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250529185637-4404e3b7d227
-	github.com/pulumi/pulumi/pkg/v3 v3.172.0
-	github.com/pulumi/pulumi/sdk/v3 v3.172.0
+	github.com/pulumi/pulumi/pkg/v3 v3.173.0
+	github.com/pulumi/pulumi/sdk/v3 v3.173.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/text v0.24.0
