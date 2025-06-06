@@ -403,8 +403,8 @@ github.com/pulumi/inflector v0.1.1 h1:dvlxlWtXwOJTUUtcYDvwnl6Mpg33prhK+7mzeF+Sob
 github.com/pulumi/inflector v0.1.1/go.mod h1:HUFCjcPTz96YtTuUlwG3i3EZG4WlniBvR9bd+iJxCUY=
 github.com/pulumi/pulumi-java/pkg v1.12.0 h1:T7yFnFr0bgqy6huVUANMyUeGO1/Y3r2CJJ6S5YQDQCU=
 github.com/pulumi/pulumi-java/pkg v1.12.0/go.mod h1:g8QQjEgB5wTsZptyf1vbIcI/pgYEGJObnihAEgymkAo=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606001356-19b00f28ace9 h1:a3G/J7k5zXc6ZXfpgSmwWq+WA3wsHQHtKrkbUhNSE0U=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606001356-19b00f28ace9/go.mod h1:DodyyuUf8corbYfH1m1U4pEQlhCR8LaERYAtD/yBgo0=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606014652-5957b29e28d5 h1:rObioj7yA6IkBg0zhdVeLR1raVcM1Vtoc4IxT9M6ikw=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606014652-5957b29e28d5/go.mod h1:DodyyuUf8corbYfH1m1U4pEQlhCR8LaERYAtD/yBgo0=
 github.com/pulumi/pulumi/pkg/v3 v3.174.0 h1:iv9gQ7YUMxc4lbzqbhRmSCxoh9TCo7mSBqlpzucaIQE=
 github.com/pulumi/pulumi/pkg/v3 v3.174.0/go.mod h1:LkAn8DmhCm2nkGMQASLPvHcBZqZHjZmkX5moSggbp/Y=
 github.com/pulumi/pulumi/sdk/v3 v3.174.0 h1:Pfp839hZ1L4I8rMy8VxTK/hZDjcBW7RX9AVWsigH41I=
