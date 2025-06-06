@@ -8,7 +8,7 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-java/pkg v1.12.0
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606075607-ec07854f0bf4
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250606224605-c7cc7975f9fc
 	github.com/pulumi/pulumi/pkg/v3 v3.175.0
 	github.com/pulumi/pulumi/sdk/v3 v3.175.0
 	github.com/spf13/cobra v1.9.1
