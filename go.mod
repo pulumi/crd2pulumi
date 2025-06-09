@@ -8,7 +8,7 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-java/pkg v1.12.0
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250607063504-16ba74a8e335
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250609165252-ad44c6d05cf1
 	github.com/pulumi/pulumi/pkg/v3 v3.175.0
 	github.com/pulumi/pulumi/sdk/v3 v3.175.0
 	github.com/spf13/cobra v1.9.1
@@ -142,6 +142,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
+	github.com/theory/jsonpath v0.9.0 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/x448/float16 v0.8.4 // indirect
