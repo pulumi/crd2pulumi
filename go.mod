@@ -7,7 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/go-openapi/jsonreference v0.21.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/pulumi/pulumi-java/pkg v1.13.0
+	github.com/pulumi/pulumi-java/pkg v1.13.1
 	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250618095555-7c36678b5ffb
 	github.com/pulumi/pulumi/pkg/v3 v3.177.0
 	github.com/pulumi/pulumi/sdk/v3 v3.177.0
@@ -148,7 +148,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
-	github.com/zclconf/go-cty v1.16.2 // indirect
+	github.com/zclconf/go-cty v1.16.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0 // indirect
 	go.opentelemetry.io/otel v1.36.0 // indirect
