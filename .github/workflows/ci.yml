@@ -1,12 +1,21 @@
+permissions: write-all # Equivalent to default permissions plus id-token: write
+env:
+  ESC_ACTION_OIDC_AUTH: true
+  ESC_ACTION_OIDC_ORGANIZATION: pulumi
+  ESC_ACTION_OIDC_REQUESTED_TOKEN_TYPE: urn:pulumi:token-type:access_token:organization
+  ESC_ACTION_ENVIRONMENT: github-secrets/pulumi-crd2pulumi
+  ESC_ACTION_EXPORT_ENVIRONMENT_VARIABLES: false
 name: ci
 on:
-  pull_request:
-  push:
-
+  pull_request: null
+  push: null
 jobs:
   ci:
     runs-on: macos-latest
     steps:
+      - name: Fetch secrets from ESC
+        id: esc-secrets
+        uses: pulumi/esc-action@v1
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -26,7 +35,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ steps.esc-secrets.outputs.CODECOV_TOKEN }}
 
       - name: Goreleaser publishing dry run
         uses: goreleaser/goreleaser-action@v3
@@ -34,4 +43,4 @@ jobs:
           version: v1.26.2
           args: release --rm-dist --skip-publish
         env:
-          GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.esc-secrets.outputs.PULUMI_BOT_TOKEN }}

@@ -1,3 +1,4 @@
+permissions: write-all # Equivalent to default permissions plus id-token: write
 name: release
 "on":
   push:
@@ -7,11 +8,19 @@ name: release
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ESC_ACTION_OIDC_AUTH: true
+  ESC_ACTION_OIDC_ORGANIZATION: pulumi
+  ESC_ACTION_OIDC_REQUESTED_TOKEN_TYPE: urn:pulumi:token-type:access_token:organization
+  ESC_ACTION_ENVIRONMENT: github-secrets/pulumi-crd2pulumi
+  ESC_ACTION_EXPORT_ENVIRONMENT_VARIABLES: false
 
 jobs:
   goreleaser:
     runs-on: macos-latest
     steps:
+      - name: Fetch secrets from ESC
+        id: esc-secrets
+        uses: pulumi/esc-action@v1
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install pulumictl
@@ -31,10 +40,10 @@ jobs:
           version: v1.26.2
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.esc-secrets.outputs.PULUMI_BOT_TOKEN }}
       - name: Chocolatey Package Deployment
         run: |
           CURRENT_TAG=$(pulumictl get version --language generic -o)
           pulumictl create choco-deploy -a crd2pulumi ${CURRENT_TAG}
         env:
-          GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.esc-secrets.outputs.PULUMI_BOT_TOKEN }}
