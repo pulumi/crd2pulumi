@@ -8,9 +8,9 @@ require (
 	github.com/go-openapi/jsonreference v0.21.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-java/pkg v1.16.1
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250806063524-9c2095aa64a5
-	github.com/pulumi/pulumi/pkg/v3 v3.187.0
-	github.com/pulumi/pulumi/sdk/v3 v3.187.0
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20250807140801-9d631ad3694c
+	github.com/pulumi/pulumi/pkg/v3 v3.188.0
+	github.com/pulumi/pulumi/sdk/v3 v3.188.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/text v0.26.0
@@ -127,7 +127,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/pulumi/appdash v0.0.0-20231130102222-75f619a67231 // indirect
 	github.com/pulumi/cloud-ready-checks v1.3.0 // indirect
-	github.com/pulumi/esc v0.14.3 // indirect
+	github.com/pulumi/esc v0.17.0 // indirect
 	github.com/pulumi/inflector v0.1.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
