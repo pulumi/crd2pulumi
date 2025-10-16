@@ -33,6 +33,7 @@ func GenerateNodeJS(pg *PackageGenerator, cs *CodegenSettings) (map[string]*byte
 	pkg := pg.SchemaPackageWithObjectMetaType()
 	oldName := pkg.Name
 	pkg.Name = cs.PackageName
+	pkg.Namespace = cs.PackageNamespace
 
 	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true, nil)
 	if err != nil {
