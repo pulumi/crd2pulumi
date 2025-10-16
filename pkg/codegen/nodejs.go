@@ -29,10 +29,10 @@ export type ObjectMeta = k8s.types.input.meta.v1.ObjectMeta;
 export type ObjectMetaPatch = k8s.types.input.meta.v1.ObjectMetaPatch;
 `
 
-func GenerateNodeJS(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
+func GenerateNodeJS(pg *PackageGenerator, cs *CodegenSettings) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 	oldName := pkg.Name
-	pkg.Name = name
+	pkg.Name = cs.PackageName
 
 	files, err := nodejs.GeneratePackage(PulumiToolName, pkg, nil, nil, true, nil)
 	if err != nil {

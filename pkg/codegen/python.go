@@ -27,12 +27,12 @@ const pythonMetaFile = `from pulumi_kubernetes.meta.v1._inputs import *
 import pulumi_kubernetes.meta.v1.outputs
 `
 
-func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
+func GeneratePython(pg *PackageGenerator, cs *CodegenSettings) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
 	langName := "python"
 	oldName := pkg.Name
-	pkg.Name = name
+	pkg.Name = cs.PackageName
 
 	files, err := python.GeneratePackage(PulumiToolName, pkg, nil, nil)
 	if err != nil {
@@ -42,7 +42,7 @@ func GeneratePython(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	pkg.Name = oldName
 	delete(pkg.Language, langName)
 
-	pythonPackageDir := "pulumi_" + name
+	pythonPackageDir := "pulumi_" + cs.PackageName
 
 	// Remove unneeded files
 	var unneededPythonFiles = []string{

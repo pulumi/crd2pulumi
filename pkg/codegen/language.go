@@ -32,12 +32,13 @@ const Python string = "python"
 const Java string = "java"
 
 type CodegenSettings struct {
-	Language       string
-	OutputDir      string
-	PackageName    string
-	PackageVersion string
-	Overwrite      bool
-	ShouldGenerate bool
+	Language         string
+	OutputDir        string
+	PackageName      string
+	PackageNamespace string
+	PackageVersion   string
+	Overwrite        bool
+	ShouldGenerate   bool
 }
 
 func (cs *CodegenSettings) Path() string {

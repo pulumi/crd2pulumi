@@ -12,7 +12,7 @@ import (
 
 // GenerateFunc is the function that is called by the generator to generate the code.
 // It returns a mapping of filename to the contents of said file and any error that may have occurred.
-type GenerateFunc func(pg *PackageGenerator, name string) (mapFileNameToData map[string]*bytes.Buffer, err error)
+type GenerateFunc func(pg *PackageGenerator, cs *CodegenSettings) (mapFileNameToData map[string]*bytes.Buffer, err error)
 
 var codeGenFuncs = map[string]GenerateFunc{
 	Go:     GenerateGo,
@@ -59,7 +59,7 @@ func Generate(cs *CodegenSettings, yamls []io.ReadCloser) error {
 	}
 
 	// Do actual codegen
-	output, err := generate(pg, cs.PackageName)
+	output, err := generate(pg, cs)
 	if err != nil {
 		return fmt.Errorf("failed to generate %q package %q: %w", cs.Language, cs.PackageName, err)
 	}

@@ -32,7 +32,7 @@ var unneededDotNetFiles = []string{
 	"Provider.cs",
 }
 
-func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
+func GenerateDotNet(pg *PackageGenerator, cs *CodegenSettings) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
 	// Set up C# namespaces
@@ -56,7 +56,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	// `Pulumi.Kubernetes.Types.Outputs.Meta.V1.ObjectMeta`. This path would
 	// only get generated properly if `compatibility` was `kubernetes20`.
 	oldName := pkg.Name
-	pkg.Name = name
+	pkg.Name = cs.PackageName
 	var err error
 
 	files, err := dotnet.GeneratePackage(PulumiToolName, pkg, nil, nil)
@@ -67,7 +67,7 @@ func GenerateDotNet(pg *PackageGenerator, name string) (map[string]*bytes.Buffer
 	pkg.Name = oldName
 	delete(pkg.Language, "csharp")
 
-	namespaceName := dotnet.Title(name)
+	namespaceName := dotnet.Title(cs.PackageName)
 	files["KubernetesResource.cs"] = []byte(kubernetesResource(namespaceName))
 	files["Utilities.cs"] = []byte(dotNetUtilities(namespaceName))
 
