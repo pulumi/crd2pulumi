@@ -41,17 +41,21 @@ spec:
 	}
 
 	// Pick a generated file we want to exclude
-	uneededGoFile := "uneededgofilestest/test/testResource.go"
-	codegen.UnneededGoFiles.Add(uneededGoFile)
+	unNeededGoFile := "unneededgofilestest/test/testResource.go"
+	codegen.UnneededGoFiles.Add(unNeededGoFile)
 
 	// Generate the code from the mocked CRD
-	buffers, err := codegen.GenerateGo(pg, "crds")
+	goSettings := &codegen.CodegenSettings{
+		Language:    "go",
+		PackageName: "crds",
+	}
+	buffers, err := codegen.GenerateGo(pg, goSettings)
 	if err != nil {
 		t.Fatalf("GenerateGo failed: %v", err)
 	}
 
 	// Assert that buffers do not contain unneeded file
-	if _, exists := buffers["../kubernetes/"+uneededGoFile]; exists {
-		t.Errorf("Uneeded GO file was not excluded by GoGenerate, %s", uneededGoFile)
+	if _, exists := buffers["../kubernetes/"+unNeededGoFile]; exists {
+		t.Errorf("Unneeded GO file was not excluded by GoGenerate, %s", unNeededGoFile)
 	}
 }
