@@ -43,10 +43,11 @@ func GeneratePython(pg *PackageGenerator, cs *CodegenSettings) (map[string]*byte
 	pkg.Name = oldName
 	delete(pkg.Language, langName)
 
-	pythonPackageDir := "pulumi_" + cs.PackageName
-	if cs.PackageNamespace != "" {
-		pythonPackageDir = cs.PackageNamespace + "_" + cs.PackageName
+	namespace := cs.PackageNamespace
+	if namespace == "" {
+		namespace = "pulumi"
 	}
+	pythonPackageDir := namespace + "_" + cs.PackageName
 
 	// Remove unneeded files
 	var unneededPythonFiles = []string{
