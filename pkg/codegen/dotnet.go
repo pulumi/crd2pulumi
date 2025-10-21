@@ -69,7 +69,7 @@ func GenerateDotNet(pg *PackageGenerator, cs *CodegenSettings) (map[string]*byte
 	delete(pkg.Language, "csharp")
 
 	packageName := dotnet.Title(cs.PackageName)
-	namespace := dotnet.Title(cs.PackageNamespace)
+	namespace := cs.PackageNamespace
 	if namespace == "" {
 		namespace = "Pulumi"
 	}
