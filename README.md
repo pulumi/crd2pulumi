@@ -69,8 +69,8 @@ Flags:
       --goPath string                optional Go output dir
   -h, --help                         help for crd2pulumi
   -j, --java                         generate Java
+      --javaBasePackage string       base package of generated Java package
       --javaName string              name of generated Java package (default "crds")
-      --javaNamespace string         namespace of generated Java package
       --javaPath string              optional Java output dir
   -n, --nodejs                       generate NodeJS
       --nodejsName string            name of generated NodeJS package (default "crds")
