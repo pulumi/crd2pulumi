@@ -36,7 +36,7 @@ var UnneededGoFiles = codegen.NewStringSet(
 	"utilities/pulumiVersion.go",
 )
 
-func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Buffer, err error) {
+func GenerateGo(pg *PackageGenerator, cs *CodegenSettings) (buffers map[string]*bytes.Buffer, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
@@ -46,7 +46,7 @@ func GenerateGo(pg *PackageGenerator, name string) (buffers map[string]*bytes.Bu
 	pkg := pg.SchemaPackageWithObjectMetaType()
 	langName := "go"
 	oldName := pkg.Name
-	pkg.Name = name
+	pkg.Name = cs.PackageName
 	moduleToPackage, err := pg.ModuleToPackage()
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)

@@ -59,23 +59,28 @@ Available Commands:
   version     Print the version number of crd2pulumi
 
 Flags:
-  -d, --dotnet              generate .NET
-      --dotnetName string   name of .NET package (default "crds")
-      --dotnetPath string   optional .NET output dir
-  -f, --force               overwrite existing files
-  -g, --go                  generate Go
-      --goName string       name of Go package (default "crds")
-      --goPath string       optional Go output dir
-  -h, --help                help for crd2pulumi
-  -j, --java                generate Java
-      --javaName string     name of Java package (default "crds")
-      --javaPath string     optional Java output dir
-  -n, --nodejs              generate NodeJS
-      --nodejsName string   name of NodeJS package (default "crds")
-      --nodejsPath string   optional NodeJS output dir
-  -p, --python              generate Python
-      --pythonName string   name of Python package (default "crds")
-      --pythonPath string   optional Python output dir
+  -d, --dotnet                       generate .NET
+      --dotnetName string            name of generated .NET package (default "crds")
+      --dotnetNamespace string       namespace of generated .NET package
+      --dotnetPath string            optional .NET output dir
+  -f, --force                        overwrite existing files
+  -g, --go                           generate Go
+      --goName string                name of generated Go package (default "crds")
+      --goPath string                optional Go output dir
+  -h, --help                         help for crd2pulumi
+  -j, --java                         generate Java
+      --javaBasePackage string       base package of generated Java package
+      --javaName string              name of generated Java package (default "crds")
+      --javaPath string              optional Java output dir
+  -n, --nodejs                       generate NodeJS
+      --nodejsName string            name of generated NodeJS package (default "crds")
+      --nodejsNamespace string       namespace of generated NodeJS package
+      --nodejsPath string            optional NodeJS output dir
+  -p, --python                       generate Python
+      --pythonName string            name of generated Python package (default "crds")
+      --pythonPackagePrefix string   prefix of generated Python package
+      --pythonPath string            optional Python output dir
+
 
 Use "crd2pulumi [command] --help" for more information about a command.
 ```

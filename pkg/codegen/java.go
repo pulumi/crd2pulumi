@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/pulumi/crd2pulumi/internal/versions"
 	javaGen "github.com/pulumi/pulumi-java/pkg/codegen/java"
 )
 
-func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, error) {
+func GenerateJava(pg *PackageGenerator, cs *CodegenSettings) (map[string]*bytes.Buffer, error) {
 	pkg := pg.SchemaPackageWithObjectMetaType()
 
 	// These fields are required for the Java code generation
@@ -47,7 +48,19 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 
 	langName := "java"
 	oldName := pkg.Name
-	pkg.Name = name
+	pkg.Name = cs.PackageName
+	pkg.Namespace = cs.PackageNamespace
+
+	// Override Java base package to avoid pulumi-java defaulting logic adding an extra "com." prefix
+	if pkg.Language == nil {
+		pkg.Language = map[string]interface{}{}
+	}
+	pkg.Language[langName] = javaGen.PackageInfo{BasePackage: cs.PackageNamespace}
+
+	namespacePath := "com/pulumi"
+	if cs.PackageNamespace != "" {
+		namespacePath = strings.ReplaceAll(cs.PackageNamespace, ".", "/")
+	}
 
 	files, err := javaGen.GeneratePackage("crd2pulumi", pkg, nil, nil, true, false)
 	if err != nil {
@@ -58,10 +71,10 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	delete(pkg.Language, langName)
 
 	// Pin the kubernetes provider version used
-	utilsPath := "src/main/java/com/pulumi/" + name + "/Utilities.java"
+	utilsPath := "src/main/java/" + namespacePath + "/" + cs.PackageName + "/Utilities.java"
 	utils, ok := files[utilsPath]
 	if !ok {
-		return nil, fmt.Errorf("cannot find generated utilities.ts")
+		return nil, fmt.Errorf("cannot find generated Utilities.java at path: %s", utilsPath)
 	}
 	re := regexp.MustCompile(`static \{(?:[^{}]|{[^{}]*})*}`)
 	files[utilsPath] = []byte(re.ReplaceAllString(string(utils), `static {
@@ -69,8 +82,8 @@ func GenerateJava(pg *PackageGenerator, name string) (map[string]*bytes.Buffer, 
 	}`))
 
 	var unneededJavaFiles = []string{
-		"src/main/java/com/pulumi/" + name + "/Provider.java",
-		"src/main/java/com/pulumi/" + name + "/ProviderArgs.java",
+		"src/main/java/" + namespacePath + "/" + cs.PackageName + "/Provider.java",
+		"src/main/java/" + namespacePath + "/" + cs.PackageName + "/ProviderArgs.java",
 		"src/main/java/com/pulumi/kubernetes/meta/v1/inputs/ObjectMetaArgs.java",
 		"src/main/java/com/pulumi/kubernetes/meta/v1/outputs/ObjectMeta.java",
 	}

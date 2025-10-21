@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.0 (2025-10-17)
+
+- Configurable package namespaces/prefixes. (https://github.com/pulumi/crd2pulumi/pull/247)
+
 ## 1.5.4 (2024-11-13)
 
 - NodeJS now uses correct input/output types for object metadata. (https://github.com/pulumi/crd2pulumi/issues/158)

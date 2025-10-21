@@ -123,6 +123,11 @@ func New() *cobra.Command {
 	f.StringVarP(&pythonSettings.PackageName, "pythonName", "", codegen.DefaultName, "name of generated Python package")
 	f.StringVarP(&javaSettings.PackageName, "javaName", "", codegen.DefaultName, "name of generated Java package")
 
+	f.StringVarP(&dotNetSettings.PackageNamespace, "dotnetNamespace", "", "", "namespace of generated .NET package")
+	f.StringVarP(&nodejsSettings.PackageNamespace, "nodejsNamespace", "", "", "namespace of generated NodeJS package")
+	f.StringVarP(&pythonSettings.PackageNamespace, "pythonPackagePrefix", "", "", "prefix of generated Python package")
+	f.StringVarP(&javaSettings.PackageNamespace, "javaBasePackage", "", "", "base package of generated Java package")
+
 	f.StringVarP(&dotNetSettings.OutputDir, "dotnetPath", "", "", "optional .NET output dir")
 	f.StringVarP(&goSettings.OutputDir, "goPath", "", "", "optional Go output dir")
 	f.StringVarP(&nodejsSettings.OutputDir, "nodejsPath", "", "", "optional NodeJS output dir")
