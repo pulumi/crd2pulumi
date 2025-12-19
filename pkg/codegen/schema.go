@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -153,7 +154,25 @@ func genPackage(version string, crgenerators []CustomResourceGenerator, includeO
 
 	pkg, err := pschema.ImportSpec(pkgSpec, nil, pschema.ValidationOptions{})
 	if err != nil {
-		return &pschema.Package{}, fmt.Errorf("could not import spec: %w", err)
+		msg, err2 := func() (string, error) {
+			f, err := os.CreateTemp("", "crd2pulumi-schema-*.json")
+			if err != nil {
+				return "", err
+			}
+			defer f.Close()
+
+			if err := json.NewEncoder(f).Encode(pkgSpec); err != nil {
+				return "", err
+			}
+			return f.Name(), nil
+		}()
+		if err2 != nil {
+			msg = fmt.Sprintf("could not save schema: %v", err)
+		} else {
+			msg = fmt.Sprintf("schema file: %v", msg)
+		}
+
+		return &pschema.Package{}, fmt.Errorf("could not import spec: %w (%v)", err, msg)
 	}
 
 	pkg.Name = DefaultName
