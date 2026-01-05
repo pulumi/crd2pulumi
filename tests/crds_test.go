@@ -33,7 +33,14 @@ var languages = []string{"dotnet", "go", "nodejs", "python", "java"}
 
 // execCrd2Pulumi runs the crd2pulumi binary in a temporary directory
 func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t *testing.T, path string)) {
-	tmpdir := t.TempDir()
+	tmpdir, err := os.MkdirTemp("", "test-crd2pulumi-*")
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		if !t.Failed() {
+			err = os.RemoveAll(tmpdir)
+			_ = err
+		}
+	})
 	langFlag := fmt.Sprintf("--%sPath", lang) // e.g. --dotnetPath
 
 	cmd := cmd.New()
@@ -43,7 +50,7 @@ func execCrd2Pulumi(t *testing.T, lang, path string, additionalValidation func(t
 	cmd.SetErr(stderr)
 
 	t.Logf("crd2pulumi %s=%s %s: running", langFlag, tmpdir, path)
-	err := cmd.Execute()
+	err = cmd.Execute()
 	t.Logf("%s=%s %s: output=\n%s", langFlag, tmpdir, path, stdout.String()+stderr.String())
 	if err != nil {
 		t.Fatalf("expected crd2pulumi for '%s=%s %s' to succeed", langFlag, tmpdir, path)
@@ -269,7 +276,7 @@ func TestNodeJsObjectMeta(t *testing.T) {
 				t.Fatalf("expected to read generated NodeJS code: %s", err)
 			}
 
-			assert.Contains(t, string(testResource), "public readonly metadata!: pulumi.Output<outputs.meta.v1.ObjectMeta>;", "expected metadata output type")
+			assert.Contains(t, string(testResource), "public readonly metadata: pulumi.Output<outputs.meta.v1.ObjectMeta>;", "expected metadata output type")
 			assert.Contains(t, string(testResource), "metadata?: pulumi.Input<inputs.meta.v1.ObjectMeta>;", "expected metadata input type")
 		})
 	}
