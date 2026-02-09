@@ -1,4 +1,4 @@
-// Copyright 2016-2022, Pulumi Corporation.
+// Copyright 2016-2026, Pulumi Corporation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/pulumi/crd2pulumi/internal/versions"
-	"github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
+	"github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3/codegen"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
