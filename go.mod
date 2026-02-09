@@ -10,7 +10,7 @@ require (
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.100.0
 	github.com/pulumi/pulumi-java/pkg v1.16.1
 	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260115033456-f47bc2d6f199
-	github.com/pulumi/pulumi/pkg/v3 v3.219.1-0.20260208071218-1bd84f1343e1
+	github.com/pulumi/pulumi/pkg/v3 v3.219.1-0.20260209173236-3392d063db7d
 	github.com/pulumi/pulumi/sdk/v3 v3.219.1-0.20260208071218-1bd84f1343e1
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.10.0
