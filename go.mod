@@ -7,7 +7,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.101.2
 	github.com/pulumi/pulumi-java/pkg v1.21.2
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260306062607-ecf6701c9e67
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260309180337-af862bb84987
 	github.com/pulumi/pulumi/pkg/v3 v3.225.1
 	github.com/pulumi/pulumi/sdk/v3 v3.225.1
 	github.com/spf13/cobra v1.10.2
@@ -136,7 +136,6 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/pulumi/appdash v0.0.0-20231130102222-75f619a67231 // indirect
-	github.com/pulumi/cloud-ready-checks v1.4.0 // indirect
 	github.com/pulumi/esc v0.22.0 // indirect
 	github.com/pulumi/inflector v0.2.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
