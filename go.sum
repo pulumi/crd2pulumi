@@ -443,8 +443,8 @@ github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.0 h1:5jMf8Tk+nT
 github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.0/go.mod h1:s83nigApWw9uBGOLc3LlbJKWOw5IRhIqTe2IJMij9KQ=
 github.com/pulumi/pulumi-java/pkg v1.21.3 h1:Rzti1qvTkY9vFoah3R+K2oUDI71rC/HMOy1YZrQgtgc=
 github.com/pulumi/pulumi-java/pkg v1.21.3/go.mod h1:gmb9so5DANWs4HIhwRKTIIe9aUcMoqcJkd7Nsuu7r1U=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260313163821-79e403d23a26 h1:gsIFNbjDUb1R94vitFwKvQmdjr3vIgF9CE6ziuTdJBA=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260313163821-79e403d23a26/go.mod h1:2CPCqYZ4ZGY/j1aEYUzihlFqfrFGCNmAB70LV9r82UM=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260317210410-0d107130295a h1:EIs6IWQZpR+kjOhHfo4WSaxTK80oyPebDJHy4sfJFas=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260317210410-0d107130295a/go.mod h1:2CPCqYZ4ZGY/j1aEYUzihlFqfrFGCNmAB70LV9r82UM=
 github.com/pulumi/pulumi/pkg/v3 v3.226.0 h1:Qj5N8od+pktzLGUvdOumIYfjDlchvonogur68QiEBb0=
 github.com/pulumi/pulumi/pkg/v3 v3.226.0/go.mod h1:BCi/S0YSBGytdOFP5+6dhYJ5CbpYTXeDgHqVmD6wjcc=
 github.com/pulumi/pulumi/sdk/v3 v3.226.0 h1:C24HWnoJSspq/KweSkAAAqWht/5pEkDanoxHe0al/dM=
