@@ -7,7 +7,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.0
 	github.com/pulumi/pulumi-java/pkg v1.21.3
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260313163821-79e403d23a26
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260317210410-0d107130295a
 	github.com/pulumi/pulumi/pkg/v3 v3.226.0
 	github.com/pulumi/pulumi/sdk/v3 v3.226.0
 	github.com/spf13/cobra v1.10.2
