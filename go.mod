@@ -1,15 +1,15 @@
 module github.com/pulumi/crd2pulumi
 
-go 1.25.6
+go 1.25.8
 
 require (
 	github.com/go-openapi/jsonreference v0.21.5
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.0
 	github.com/pulumi/pulumi-java/pkg v1.21.3
-	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260320064447-d4759d6fb0cb
-	github.com/pulumi/pulumi/pkg/v3 v3.227.0
-	github.com/pulumi/pulumi/sdk/v3 v3.227.0
+	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260401044549-98273ff0024a
+	github.com/pulumi/pulumi/pkg/v3 v3.228.0
+	github.com/pulumi/pulumi/sdk/v3 v3.228.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/text v0.35.0
@@ -183,8 +183,8 @@ require (
 	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260316180232-0b37fe3546d5 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260316180232-0b37fe3546d5 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260319201613-d00831a3d3e7 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260319201613-d00831a3d3e7 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
