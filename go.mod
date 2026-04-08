@@ -5,7 +5,7 @@ go 1.25.8
 require (
 	github.com/go-openapi/jsonreference v0.21.5
 	github.com/iancoleman/strcase v0.3.0
-	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.0
+	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.1
 	github.com/pulumi/pulumi-java/pkg v1.22.0
 	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260403054949-c2f6707259f4
 	github.com/pulumi/pulumi/pkg/v3 v3.229.0
@@ -66,7 +66,7 @@ require (
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.8.0 // indirect
-	github.com/go-git/go-git/v5 v5.17.1 // indirect
+	github.com/go-git/go-git/v5 v5.17.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.22.5 // indirect
