@@ -135,8 +135,8 @@ github.com/coreos/go-systemd/v22 v22.7.0/go.mod h1:xNUYtjHu2EDXbsxz1i41wouACIwT7
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
 github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
-github.com/cyphar/filepath-securejoin v0.4.1 h1:JyxxyPEaktOD+GAnqIqTf9A8tHyAG22rowi7HkoSU1s=
-github.com/cyphar/filepath-securejoin v0.4.1/go.mod h1:Sdj7gXlvMcPZsbhwhQ33GguGLDGQL7h7bg04C/+u9jI=
+github.com/cyphar/filepath-securejoin v0.6.1 h1:5CeZ1jPXEiYt3+Z6zqprSAgSWiggmpVyciv8syjIpVE=
+github.com/cyphar/filepath-securejoin v0.6.1/go.mod h1:A8hd4EnAeyujCJRrICiOWqjS1AX0a9kM5XL+NwKoYSc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
@@ -443,8 +443,8 @@ github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.1 h1:Jt0W90jeFc
 github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.102.1/go.mod h1:jfgRC76AKgNNXZ8w1xcHsOYSEaeSX9mT6bVIwrBBnjI=
 github.com/pulumi/pulumi-java/pkg v1.22.0 h1:p60fqNNS1yfZzr3xPv7o6pZoCfwySCnFduMdUr9LHTo=
 github.com/pulumi/pulumi-java/pkg v1.22.0/go.mod h1:+bc+tM+Gmstv4Mm0Ej89LX4XH+FqFtDdjisf4sBVX8E=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260410002258-7d8fe4d157dd h1:QIo8mcQukFwG8HCoRECzQkNW0TJ8NiM5hUbJ039orBM=
-github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260410002258-7d8fe4d157dd/go.mod h1:ugFqs8HweXYwm4QKg5qFGX4A+iDAZtRFirQtOyoC+z8=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260410223955-9d2f6f8eb286 h1:dnHmcjU4z71STtuwGS9UupwgExwz/YLYTIhJNvpL9Ws=
+github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260410223955-9d2f6f8eb286/go.mod h1:9sFQdj+E60WgnGBHYsuRBrCXnr15a4VEzpQH+r+seAU=
 github.com/pulumi/pulumi/pkg/v3 v3.230.0 h1:SHjHvXskFXG/aSA2/f8ZTzHizX51nBoqzA76WpmYaRo=
 github.com/pulumi/pulumi/pkg/v3 v3.230.0/go.mod h1:+PTJHGM/8Z9c85DFr53Q9FQGlfu8U0gvhSoQBsIpAWI=
 github.com/pulumi/pulumi/sdk/v3 v3.230.0 h1:0TtF82Hlor39DLU0QtM7RZPwRaOmjn5UtQKPi1Mxo9M=
