@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.6.2 (2026-05-06)
+
+### Changed
+- Switched .NET code generation to use `pulumi-dotnet`'s codegen package. [#266](https://github.com/pulumi/crd2pulumi/pull/266)
+- Bumped `pulumi/pulumi` to v3.231.0 and refreshed first-party Pulumi dependencies.
+- Bumped `pulumi-kubernetes` provider digest.
+- Bumped `pulumi-dotnet` language host to v3.103.0.
+
+### Security
+- Bumped `github.com/go-git/go-git/v5` to v5.18.0.
+- Bumped `go.opentelemetry.io/otel/sdk` to v1.43.0.
+- Bumped `github.com/cloudflare/circl` to v1.6.3.
+
 ## 1.6.0 (2025-10-17)
 
 - Configurable package namespaces/prefixes. (https://github.com/pulumi/crd2pulumi/pull/247)
