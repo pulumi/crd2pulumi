@@ -277,7 +277,7 @@ func TestNodeJsObjectMeta(t *testing.T) {
 			}
 
 			assert.Contains(t, string(testResource), "public readonly metadata: pulumi.Output<outputs.meta.v1.ObjectMeta>;", "expected metadata output type")
-			assert.Contains(t, string(testResource), "metadata?: pulumi.Input<inputs.meta.v1.ObjectMeta>;", "expected metadata input type")
+			assert.Contains(t, string(testResource), "metadata?: pulumi.Input<inputs.meta.v1.ObjectMeta | undefined>;", "expected metadata input type")
 		})
 	}
 
