@@ -5,8 +5,8 @@ go 1.26.0
 require (
 	github.com/go-openapi/jsonreference v0.21.5
 	github.com/iancoleman/strcase v0.3.0
-	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.105.0
-	github.com/pulumi/pulumi-java v1.26.0
+	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.106.0
+	github.com/pulumi/pulumi-java v1.26.1
 	github.com/pulumi/pulumi-kubernetes/provider/v4 v4.0.0-20260507071231-c70693437eed
 	github.com/pulumi/pulumi/pkg/v3 v3.236.0
 	github.com/pulumi/pulumi/sdk/v3 v3.236.0
