@@ -60,8 +60,8 @@ Available Commands:
 
 Flags:
   -d, --dotnet                       generate .NET
-      --dotnetName string            name of generated .NET package (default "crds")
-      --dotnetNamespace string       namespace of generated .NET package
+      --dotnetName string            .NET package suffix; final = "<dotnetNamespace>.<TitleCase(dotnetName)>" (default "crds")
+      --dotnetNamespace string       .NET package namespace (default "Pulumi"); final = "<dotnetNamespace>.<TitleCase(dotnetName)>"
       --dotnetPath string            optional .NET output dir
   -f, --force                        overwrite existing files
   -g, --go                           generate Go
@@ -69,16 +69,16 @@ Flags:
       --goPath string                optional Go output dir
   -h, --help                         help for crd2pulumi
   -j, --java                         generate Java
-      --javaBasePackage string       base package of generated Java package
-      --javaName string              name of generated Java package (default "crds")
+      --javaBasePackage string       Java base package (default "com.pulumi"); final = "<javaBasePackage>.<javaName>"
+      --javaName string              Java package suffix; final = "<javaBasePackage>.<javaName>" (default "crds")
       --javaPath string              optional Java output dir
   -n, --nodejs                       generate NodeJS
-      --nodejsName string            name of generated NodeJS package (default "crds")
-      --nodejsNamespace string       namespace of generated NodeJS package
+      --nodejsName string            NodeJS package suffix; final = "<nodejsNamespace><nodejsName>" (default "crds")
+      --nodejsNamespace string       NodeJS package namespace (default "@pulumi/", trailing slash included); final = "<nodejsNamespace><nodejsName>"
       --nodejsPath string            optional NodeJS output dir
   -p, --python                       generate Python
-      --pythonName string            name of generated Python package (default "crds")
-      --pythonPackagePrefix string   prefix of generated Python package
+      --pythonName string            Python package suffix; final = "<pythonPackagePrefix>_<pythonName>" (default "crds")
+      --pythonPackagePrefix string   Python package prefix (default "pulumi"); final = "<pythonPackagePrefix>_<pythonName>"
       --pythonPath string            optional Python output dir
 
 
@@ -88,6 +88,43 @@ Setting only a language-specific flag will output the generated code in the defa
 `crds/dotnet`, `-g` will output to `crds/go`, `-j` will output to `crds/java`, `-n` will output to `crds/nodejs`, and 
 `-p` will output to `crds/python`. You can also specify a language-specific path (`--pythonPath`, `--nodejsPath`, etc) 
 to control where the code will be outputted, in which case setting `-p`, `-n`, etc becomes unnecessary.
+
+## Package naming
+
+The generated package's name in each target language is composed of two
+parts: a **namespace/prefix** and a **suffix**. `crd2pulumi` prepends a
+fixed namespace per language to the value of the `--<lang>Name` flag.
+
+| Language | Prefix flag                | Default prefix | Name flag       | Default suffix | Result with defaults |
+|----------|----------------------------|----------------|-----------------|----------------|----------------------|
+| Python   | `--pythonPackagePrefix`    | `pulumi`       | `--pythonName`  | `crds`         | `pulumi_crds`        |
+| NodeJS   | `--nodejsNamespace`        | `@pulumi/`     | `--nodejsName`  | `crds`         | `@pulumi/crds`       |
+| .NET     | `--dotnetNamespace`        | `Pulumi`       | `--dotnetName`  | `crds`         | `Pulumi.Crds`        |
+| Java     | `--javaBasePackage`        | `com.pulumi`   | `--javaName`    | `crds`         | `com.pulumi.crds`    |
+| Go       | (no prefix flag)           | —              | `--goName`      | `crds`         | package = `crds`; import path from `go.mod` |
+
+So for example, to produce a Python package called `pulumi_crds_gateway`, pass
+`--pythonName crds_gateway`, **not** `--pythonName pulumi_crds_gateway`
+(the latter would produce `pulumi_pulumi_crds_gateway`).
+
+To override the default prefix, pass the matching `--<lang>Namespace` /
+`--<lang>PackagePrefix` / `--javaBasePackage` flag explicitly. Note that
+passing an empty value (`--pythonPackagePrefix=""`) falls back to the
+default — there is no way to fully omit the prefix in Python, .NET, or Java.
+
+### Example: per-CRD-group packages with explicit suffixes
+
+If you have several CRD groups and want one importable package per group
+in Python:
+
+```bash
+crd2pulumi --pythonPath gateway     --pythonName crds_gateway     gateway-crds.yaml
+crd2pulumi --pythonPath certmanager --pythonName crds_certmanager certmanager-crds.yaml
+crd2pulumi --pythonPath traefik     --pythonName crds_traefik     traefik-crds.yaml
+```
+
+This produces three importable packages: `pulumi_crds_gateway`,
+`pulumi_crds_certmanager`, and `pulumi_crds_traefik`.
 
 ## Examples
 Let's use the example CronTab CRD specified in `resourcedefinition.yaml` from the 
