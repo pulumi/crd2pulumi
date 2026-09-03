@@ -1,3 +1,10 @@
+## Deprecation Notice
+
+This repository has been DEPRECATED. 
+It will no longer receive active updates. 
+We recommend you use [Typed CRD Packages](https://www.pulumi.com/registry/packages/kubernetes/how-to-guides/typed-customresources-with-provider-extensions/) via `pulumi package add --extension` instead.
+Please file any issues to [the Pulumi Kubernetes Provider](https://github.com/pulumi/pulumi-kubernetes).
+
 # crd2pulumi
 Generate typed CustomResources based on Kubernetes CustomResourceDefinitions.
 
