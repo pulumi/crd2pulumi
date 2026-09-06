@@ -65,6 +65,18 @@ func GeneratePython(pg *PackageGenerator, cs *CodegenSettings) (map[string]*byte
 		files[metaPath] = append(code, []byte(pythonMetaFile)...)
 	}
 
+	// Pin the kubernetes provider version used
+	utilitiesPath := filepath.Join(pythonPackageDir, "_utilities.py")
+	utilities, ok := files[utilitiesPath]
+	if !ok {
+		return nil, fmt.Errorf("cannot find generated _utilities.py")
+	}
+	files[utilitiesPath] = bytes.ReplaceAll(
+		utilities,
+		[]byte("def get_version():\n     return _version_str"),
+		[]byte(fmt.Sprintf("def get_version():\n     return \"%s\"", KubernetesProviderVersion)),
+	)
+
 	buffers := map[string]*bytes.Buffer{}
 	for name, code := range files {
 		if name == "pyproject.toml" {

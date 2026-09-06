@@ -261,6 +261,23 @@ func TestKubernetesVersionNodeJs(t *testing.T) {
 	execCrd2Pulumi(t, "nodejs", "crds/k8sversion/mock_crd.yaml", validateVersion)
 }
 
+func TestKubernetesVersionPython(t *testing.T) {
+	validateVersion := func(t *testing.T, path string) {
+		filename := filepath.Join(path, "pulumi_crds", "_utilities.py")
+		t.Logf("validating kubernetes provider version in %s", filename)
+
+		utilities, err := os.ReadFile(filename)
+		if err != nil {
+			t.Fatalf("expected to read generated Python utilities: %s", err)
+		}
+
+		assert.Contains(t, string(utilities), fmt.Sprintf("return \"%s\"", codegen.KubernetesProviderVersion))
+		assert.NotContains(t, string(utilities), "return _version_str")
+	}
+
+	execCrd2Pulumi(t, "python", "crds/k8sversion/mock_crd.yaml", validateVersion)
+}
+
 func TestNodeJsObjectMeta(t *testing.T) {
 	validateVersion := func(t *testing.T, path string) {
 		// enter and build the generated package
